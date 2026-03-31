@@ -163,10 +163,9 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
     <div class="card" style="text-align:center">
       <div class="stripe"><div style="background:var(--red)"></div><div style="background:var(--orange)"></div><div style="background:var(--yellow)"></div><div style="background:var(--green)"></div><div style="background:var(--blue)"></div></div>
       <h1 style="font-size:22px;font-weight:900;margin-bottom:4px">Quiz <span style="color:var(--red)">TotalEnergies</span></h1>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Entre le code d'accès et ton prénom pour jouer</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Entre ton prénom pour jouer et apparaître dans le classement</p>
       <div style="display:flex;flex-direction:column;gap:12px">
         <input id="login-pseudo" type="text" maxlength="20" placeholder="Ton prénom ou pseudo" style="padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none">
-        <input id="login-code" type="text" maxlength="20" placeholder="Code d'accès" style="padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;letter-spacing:0.1em">
         <button onclick="doLogin()" style="background:var(--red);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Accéder au quiz →</button>
       </div>
       <div id="login-error" style="margin-top:10px;font-size:12px;color:var(--red);display:none"></div>
@@ -320,17 +319,15 @@ function savePlayer(p){localStorage.setItem('tep2_player',JSON.stringify(p));}
 
 async function doLogin(){
   const pseudo=document.getElementById('login-pseudo').value.trim();
-  const code=document.getElementById('login-code').value.trim().toUpperCase();
   const err=document.getElementById('login-error');
   if(!pseudo){err.textContent='Saisis ton prénom.';err.style.display='block';return;}
-  if(code!==INVITE_CODE){err.textContent='Code incorrect. Demande le code à Khalil.';err.style.display='block';return;}
   err.style.display='none';
-  // Check if player already exists (same pseudo + code)
-  const existing=await sbFetch(`/rest/v1/players?pseudo=eq.${encodeURIComponent(pseudo)}&invite_code=eq.${code}&select=id,pseudo`);
+  // Check if player already exists (same pseudo)
+  const existing=await sbFetch(`/rest/v1/players?pseudo=eq.${encodeURIComponent(pseudo)}&select=id,pseudo,xp,streak,last_played`);
   let player;
   if(existing&&existing.length>0){player=existing[0];}
   else{
-    const created=await sbFetch('/rest/v1/players',{method:'POST',body:JSON.stringify({pseudo,invite_code:code})});
+    const created=await sbFetch('/rest/v1/players',{method:'POST',body:JSON.stringify({pseudo,invite_code:'open'})});
     if(!created||!created.length){err.textContent='Erreur serveur. Réessaie.';err.style.display='block';return;}
     player=created[0];
   }
@@ -387,7 +384,7 @@ const LEVELS=[
   {id:2,name:"Intermédiaire",icon:"📘",color:"var(--blue)",tc:"#0064A8",timer:30,threshold:60,lv:"lv2",desc:"Mécanismes financiers, stratégie et branches"},
   {id:3,name:"Avancé",icon:"🔥",color:"var(--orange)",tc:"#F5800A",timer:25,threshold:70,lv:"lv3",desc:"Indicateurs précis, gestion de projet, stratégie groupe"},
   {id:4,name:"Expert",icon:"🏆",color:"var(--red)",tc:"#E8002D",timer:15,threshold:80,lv:"lv4",desc:"Niveau entretien RH Groupe — précision et vitesse exigées"},
-  {id:5,name:"Hardcore",icon:"💀",color:"var(--purple)",tc:"#7C3AED",timer:8,threshold:90,lv:"lv5",desc:"Pour ceux qui pensent tout savoir — 8 secondes, pas de pitié"},
+  {id:5,name:"Hardcore",icon:"💀",color:"var(--purple)",tc:"#7C3AED",timer:12,threshold:90,lv:"lv5",desc:"Pour ceux qui pensent tout savoir — 12 secondes, pas de pitié"},
 ];
 
 const CAT_LABELS={chiffres:"Chiffres TotalEnergies",finance:"Finance Corporate",strategie:"Stratégie Groupe",branches:"Branches TotalEnergies",projet:"Gestion de Projet",hardcore:"Hardcore"};
