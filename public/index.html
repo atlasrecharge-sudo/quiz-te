@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Quiz Carrière — TotalEnergies</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--red:#E8002D;--orange:#F5800A;--yellow:#F5C400;--green:#00A550;--blue:#0064A8;--purple:#7C3AED;--teal:#0891B2;--text:#0D1117;--muted:#6B7280;--border:rgba(0,0,0,0.08);--white:#FFFFFF;--bg:#F4F6FA;--card:#FFFFFF;--topbg:rgba(255,255,255,0.96)}
+[data-theme="dark"]{--text:#E6EDF3;--muted:#8B949E;--border:rgba(255,255,255,0.08);--white:#161B22;--bg:#0D1117;--card:#161B22;--topbg:rgba(13,17,23,0.96)}
+html{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);transition:background 0.3s,color 0.3s}
+body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:var(--topbg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.tl{display:flex;align-items:center;gap:10px}
+.ti{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:900}
+.tn{font-size:14px;font-weight:800;color:var(--text)}
+.ts{font-size:10px;color:var(--muted)}
+.tr{display:flex;gap:8px;align-items:center}
+.mode-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:inherit;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.mode-btn.on{background:var(--orange);color:white;border-color:var(--orange)}
+.dark-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.app{width:100%;max-width:560px;padding:72px 16px 60px}
+.screen{display:none;flex-direction:column;gap:14px}
+.screen.active{display:flex}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 1px 8px rgba(0,0,0,0.05);transition:background 0.3s}
+.stripe{display:flex;height:5px;border-radius:100px;overflow:hidden;margin-bottom:16px;gap:3px}
+.stripe div{flex:1;border-radius:100px}
+.htabs{display:flex;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:4px}
+.htab{flex:1;padding:8px;border-radius:10px;border:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.15s}
+.htab.on{background:var(--orange);color:white}
+.level-card{border-radius:16px;border:2px solid var(--border);padding:15px 16px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;background:var(--card)}
+.level-card:active:not(.locked){opacity:0.85}
+.level-card.locked{opacity:0.45;cursor:not-allowed}
+.lv1{border-color:rgba(0,165,80,0.3)}.lv1 .lname{color:var(--green)}
+.lv2{border-color:rgba(0,100,168,0.3)}.lv2 .lname{color:var(--blue)}
+.lv3{border-color:rgba(245,128,10,0.3)}.lv3 .lname{color:var(--orange)}
+.lv4{border-color:rgba(232,0,45,0.3)}.lv4 .lname{color:var(--red)}
+.lv5{border-color:rgba(124,58,237,0.4);background:linear-gradient(135deg,rgba(124,58,237,0.04),transparent)}.lv5 .lname{color:var(--purple)}
+.licon{font-size:26px;flex-shrink:0}
+.linfo{flex:1}
+.lname{font-size:14px;font-weight:800;margin-bottom:2px}
+.ldesc{font-size:11px;color:var(--muted);margin-bottom:5px}
+.lmeta{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block}
+.lright{text-align:right;flex-shrink:0}
+.lscore{font-size:15px;font-weight:900}
+.lpct{font-size:10px;color:var(--muted)}
+.lprog{height:3px;border-radius:100px;background:var(--bg);overflow:hidden;margin-top:5px}
+.lbar{height:100%;border-radius:100px;transition:width 0.5s}
+.xp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.xp-label{font-size:13px;font-weight:700;color:var(--text)}
+.xp-val{font-size:12px;color:var(--muted)}
+.xp-track{height:7px;border-radius:100px;background:var(--bg);overflow:hidden}
+.xp-fill{height:100%;border-radius:100px;transition:width 0.5s;background:linear-gradient(90deg,var(--orange),var(--red))}
+.streak-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.streak-badge{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--orange)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+.stat-n{font-size:28px;font-weight:900;color:var(--text)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+.chart-wrap{position:relative;height:120px;display:flex;align-items:flex-end;gap:6px;padding:0 4px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:6px 6px 0 0;transition:height 0.5s;min-height:4px}
+.chart-label{font-size:9px;color:var(--muted)}
+.weakpoints{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.wp-row{display:flex;align-items:center;gap:10px}
+.wp-bar{flex:1;height:6px;border-radius:100px;background:var(--bg);overflow:hidden}
+.wp-fill{height:100%;border-radius:100px}
+.wp-label{font-size:11px;color:var(--muted);min-width:90px}
+.wp-pct{font-size:12px;font-weight:700;min-width:32px;text-align:right}
+.memo-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.mtab{padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:11px;font-weight:700;font-family:inherit;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.mtab.on{background:var(--orange);color:white;border-color:var(--orange)}
+.memo-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:10px}
+.memo-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px}
+.memo-item{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);gap:12px}
+.memo-item:last-child{border-bottom:none}
+.memo-key{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.memo-val{font-size:13px;font-weight:800;text-align:right;flex-shrink:0}
+.memo-exp{font-size:11px;color:var(--muted);margin-top:2px}
+.quiz-hdr{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px 16px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.qm{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.qnum{font-size:12px;color:var(--muted);font-weight:600}
+.qtimer{font-size:12px;font-weight:800;padding:3px 11px;border-radius:20px;background:rgba(0,100,168,0.1);color:var(--blue);min-width:44px;text-align:center;transition:all 0.3s}
+.qtimer.hot{background:rgba(232,0,45,0.1);color:var(--red)}
+.qlvbadge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px}
+.pw{background:var(--bg);border-radius:100px;height:4px;overflow:hidden}
+.pb{height:100%;border-radius:100px;transition:width 0.4s}
+.qcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 18px;box-shadow:0 1px 8px rgba(0,0,0,0.05);animation:slideIn 0.25s ease-out}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.qbadge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 11px;border-radius:20px;margin-bottom:12px}
+.b-chiffres{background:rgba(0,100,168,0.1);color:var(--blue)}
+.b-finance{background:rgba(0,165,80,0.1);color:var(--green)}
+.b-strategie{background:rgba(245,128,10,0.1);color:var(--orange)}
+.b-branches{background:rgba(124,58,237,0.1);color:var(--purple)}
+.b-projet{background:rgba(8,145,178,0.1);color:var(--teal)}
+.qtext{font-size:17px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:5px}
+.qhint{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+.answers{display:flex;flex-direction:column;gap:9px}
+.ans{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:12px 13px;text-align:left;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.4;transition:border-color 0.15s,background 0.15s}
+.ans:hover:not(:disabled){border-color:var(--orange);background:rgba(245,128,10,0.04)}
+.ans:disabled{cursor:default}
+.ans.correct{border-color:var(--green);background:rgba(0,165,80,0.07)}
+.ans.wrong{border-color:var(--red);background:rgba(232,0,45,0.05)}
+.ans.reveal{border-color:var(--green);background:rgba(0,165,80,0.05)}
+.ansl{width:26px;height:26px;border-radius:7px;flex-shrink:0;border:1.5px solid var(--border);background:var(--card);font-size:11px;font-weight:800;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.correct .ansl{background:var(--green);color:white;border-color:var(--green)}
+.wrong .ansl{background:var(--red);color:white;border-color:var(--red)}
+.reveal .ansl{background:var(--green);color:white;border-color:var(--green)}
+.fb{border-radius:11px;padding:12px 14px;font-size:13px;line-height:1.6;display:none;margin-top:10px}
+.fb.show{display:block}
+.fb.ok{background:rgba(0,165,80,0.08);border:1px solid rgba(0,165,80,0.2);color:#007A3A}
+.fb.ko{background:rgba(232,0,45,0.06);border:1px solid rgba(232,0,45,0.2);color:var(--red)}
+[data-theme="dark"] .fb.ok{color:#56d364}[data-theme="dark"] .fb.ko{color:#ff7b72}
+.btn-next{width:100%;background:var(--card);border:1.5px solid rgba(245,128,10,0.35);border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;color:var(--orange);cursor:pointer;display:none;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.btn-next.show{display:block}
+.rtop{text-align:center}
+.remoji{font-size:48px;margin-bottom:6px}
+.rtitle{font-size:24px;font-weight:900;color:var(--text);margin-bottom:4px}
+.rscore{font-size:50px;font-weight:900;letter-spacing:-0.03em;line-height:1}
+.rsub{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6}
+.rtime{font-size:13px;color:var(--muted);margin-top:4px}
+.unlock-banner{background:linear-gradient(135deg,rgba(245,128,10,0.1),rgba(232,0,45,0.08));border:1.5px solid rgba(245,128,10,0.25);border-radius:14px;padding:16px;text-align:center}
+.ulicon{font-size:28px;margin-bottom:4px}
+.ultitle{font-size:15px;font-weight:800;color:var(--orange);margin-bottom:3px}
+.uldesc{font-size:12px;color:var(--muted)}
+.bd-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.bdrow{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.bdrow:last-child{border-bottom:none}
+.bdlabel{color:var(--muted)}
+.bdval{font-weight:800}
+.vg{color:var(--green)}.vm{color:var(--orange)}.vb{color:var(--red)}
+.btn-retry{width:100%;background:var(--orange);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px}
+.btn-back{width:100%;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
+.flashcard{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 20px 28px;box-shadow:0 1px 10px rgba(0,0,0,0.06);text-align:center;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;animation:slideIn 0.2s ease-out}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:999}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 3s ease-in forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 20px;border-radius:11px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="confetti-wrap" id="confetti"></div>
+
+<header class="topbar">
+  <div class="tl">
+    <div class="ti">T</div>
+    <div><div class="tn">Quiz TotalEnergies</div><div class="ts">Préparation Entretien RH</div></div>
+  </div>
+  <div class="tr">
+    <button class="mode-btn on" id="m-quiz" onclick="setMode('quiz')">QCM</button>
+    <button class="mode-btn" id="m-flash" onclick="setMode('flash')">Flash</button>
+    <button class="dark-btn" onclick="toggleDark()" id="dark-btn">🌙</button>
+  </div>
+</header>
+
+<div class="app">
+  <!-- HOME -->
+  <!-- LOGIN SCREEN -->
+  <div class="screen" id="screen-login">
+    <div class="card" style="text-align:center">
+      <div class="stripe"><div style="background:var(--red)"></div><div style="background:var(--orange)"></div><div style="background:var(--yellow)"></div><div style="background:var(--green)"></div><div style="background:var(--blue)"></div></div>
+      <h1 style="font-size:22px;font-weight:900;margin-bottom:4px">Quiz <span style="color:var(--red)">TotalEnergies</span></h1>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Entre le code d'accès et ton prénom pour jouer</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <input id="login-pseudo" type="text" maxlength="20" placeholder="Ton prénom ou pseudo" style="padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none">
+        <input id="login-code" type="text" maxlength="20" placeholder="Code d'accès" style="padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;letter-spacing:0.1em">
+        <button onclick="doLogin()" style="background:var(--red);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Accéder au quiz →</button>
+      </div>
+      <div id="login-error" style="margin-top:10px;font-size:12px;color:var(--red);display:none"></div>
+    </div>
+  </div>
+
+  <div class="screen active" id="screen-home">
+    <div class="card">
+      <div class="stripe"><div style="background:var(--red)"></div><div style="background:var(--orange)"></div><div style="background:var(--yellow)"></div><div style="background:var(--green)"></div><div style="background:var(--blue)"></div></div>
+      <h1 style="font-size:24px;font-weight:900;letter-spacing:-0.02em;margin-bottom:5px">Quiz <span style="color:var(--red)">TotalEnergies</span></h1>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px">4 niveaux · 5 modules · 60 questions · Fiches mémo incluses</p>
+      <div style="display:flex;flex-direction:column;gap:10px" id="levels-grid"></div>
+    </div>
+    <div class="card">
+      <div class="xp-row"><span class="xp-label" id="xp-lname">Débutant</span><span class="xp-val" id="xp-val">0 XP</span></div>
+      <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+      <div class="streak-row">
+        <div class="streak-badge">🔥 <span id="streak-text">0 jour consécutif</span></div>
+        <div style="font-size:11px;color:var(--muted)" id="last-played"></div>
+      </div>
+    </div>
+    <div id="home-player-bar" style="display:none;align-items:center;justify-content:space-between;padding:8px 4px">
+      <span style="font-size:13px;font-weight:700;color:var(--text)" id="home-player-name"></span>
+      <button onclick="logout()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer">Changer →</button>
+    </div>
+    <div class="htabs">
+      <button class="htab on" onclick="switchTab('stats')">📊 Stats</button>
+      <button class="htab" onclick="switchTab('memo')">📋 Mémo</button>
+      <button class="htab" onclick="switchTab('leaderboard')">🏅 Classement</button>
+    </div>
+    <div id="tab-stats" style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px">7 dernières sessions</div>
+        <div class="chart-wrap" id="chart"></div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin:14px 0 8px">Points faibles</div>
+        <div class="weakpoints" id="weakpoints"></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-n" id="st-sessions">0</div><div class="stat-l">Sessions jouées</div></div>
+        <div class="stat-card"><div class="stat-n" id="st-correct">0%</div><div class="stat-l">Taux de réussite</div></div>
+        <div class="stat-card"><div class="stat-n" id="st-xp">0</div><div class="stat-l">XP total</div></div>
+        <div class="stat-card"><div class="stat-n" id="st-best">—</div><div class="stat-l">Meilleur niveau</div></div>
+      </div>
+    </div>
+    <div id="tab-leaderboard" style="display:none">
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:12px">🏅 Classement</div>
+        <div id="lb-content"><div style="font-size:12px;color:var(--muted)">Chargement...</div></div>
+      </div>
+    </div>
+    <div id="tab-memo" style="display:none">
+      <div class="memo-tabs">
+        <button class="mtab on" onclick="switchMemo('chiffres')">📊 Chiffres</button>
+        <button class="mtab" onclick="switchMemo('finance')">💰 Finance</button>
+        <button class="mtab" onclick="switchMemo('strategie')">🌍 Stratégie</button>
+        <button class="mtab" onclick="switchMemo('branches')">⚡ Branches</button>
+        <button class="mtab" onclick="switchMemo('projet')">🎯 Projet</button>
+        <button class="mtab" onclick="switchMemo('hardcore')">💀 Hardcore</button>
+      </div>
+      <div id="memo-content"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-hdr">
+      <div class="qm">
+        <span class="qnum" id="qnum">1/15</span>
+        <div style="display:flex;gap:7px;align-items:center">
+          <span class="qlvbadge" id="qlvbadge"></span>
+          <span class="qtimer" id="qtimer">30s</span>
+        </div>
+      </div>
+      <div class="pw"><div class="pb" id="pb" style="width:0%"></div></div>
+    </div>
+    <div class="qcard" id="qcard">
+      <div><span class="qbadge" id="qbadge">Chiffres</span></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="qhint" id="qhint"></div>
+      <div class="answers" id="answers"></div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <button class="btn-next" id="btn-next" onclick="nextQ()">Question suivante →</button>
+  </div>
+
+  <!-- FLASH -->
+  <div class="screen" id="screen-flash">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div id="fcfront" style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <span class="qbadge" id="fcbadge"></span>
+        <div id="fcq" style="font-size:17px;font-weight:800;color:var(--text);line-height:1.4"></div>
+        <div style="font-size:11px;color:var(--muted)">Appuie pour voir la réponse</div>
+      </div>
+      <div id="fcback" style="display:none;flex-direction:column;gap:8px;align-items:center">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted)">Réponse</div>
+        <div id="fca" style="font-size:16px;font-weight:700;color:var(--green);line-height:1.5;text-align:center"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:center" id="fccount">Carte 1/15</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="fcNext(false)" style="flex:1;padding:13px;border-radius:12px;font-size:13px;font-weight:700;font-family:inherit;border:1.5px solid var(--red);background:rgba(232,0,45,0.04);color:var(--red);cursor:pointer">Pas su</button>
+      <button onclick="fcNext(true)" style="flex:1;padding:13px;border-radius:12px;font-size:13px;font-weight:700;font-family:inherit;border:1.5px solid var(--green);background:rgba(0,165,80,0.05);color:var(--green);cursor:pointer">Su !</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="card rtop">
+      <div class="stripe"><div style="background:var(--red)"></div><div style="background:var(--orange)"></div><div style="background:var(--yellow)"></div><div style="background:var(--green)"></div><div style="background:var(--blue)"></div></div>
+      <div class="remoji" id="remoji"></div>
+      <div class="rtitle" id="rtitle"></div>
+      <div class="rscore" id="rscore"></div>
+      <div class="rsub" id="rsub"></div>
+      <div class="rtime" id="rtime" style="font-size:13px;color:var(--muted);margin-top:4px"></div>
+    </div>
+    <div class="unlock-banner" id="unlock-banner" style="display:none">
+      <div class="ulicon" id="ulicon"></div>
+      <div class="ultitle" id="ultitle"></div>
+      <div class="uldesc" id="uldesc"></div>
+    </div>
+    <div class="bd-card" id="bd"></div>
+    <button class="btn-retry" onclick="retryLevel()">Rejouer ce niveau</button>
+    <button id="btn-share-score" style="width:100%;background:var(--blue);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px" onclick="shareScore()">🔗 Partager mon score</button>
+    <button class="btn-back" onclick="goHome()">Retour aux niveaux</button>
+
+    <!-- Score Card partagée -->
+    <div id="shared-score-card" style="display:none;background:var(--card);border:2px solid var(--orange);border-radius:18px;padding:20px;text-align:center;margin-top:4px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px">Score partagé</div>
+      <div id="shared-score-display" style="font-size:40px;font-weight:900;color:var(--orange)"></div>
+      <div id="shared-score-level" style="font-size:13px;color:var(--muted);margin:4px 0 12px"></div>
+      <div id="shared-score-link" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--muted);word-break:break-all;text-align:left;cursor:pointer" onclick="copyLink()" title="Clique pour copier"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">👆 Clique sur le lien pour copier</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Supabase config
+const SB_URL="https://uudtxrexzbvuckbxgwxo.supabase.co";
+const SB_KEY="sb_publishable_zpaxosZrlJ0miJuP_3xH8Q_PKa2W4n7";
+const INVITE_CODE="TOTAL2026"; // code d'accès à partager aux collègues
+
+async function sbFetch(path, opts={}){
+  const res=await fetch(SB_URL+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...opts.headers},...opts});
+  return res.ok?res.json():null;
+}
+
+// Player session (localStorage)
+function getPlayer(){return JSON.parse(localStorage.getItem('tep2_player')||'null');}
+function savePlayer(p){localStorage.setItem('tep2_player',JSON.stringify(p));}
+
+async function doLogin(){
+  const pseudo=document.getElementById('login-pseudo').value.trim();
+  const code=document.getElementById('login-code').value.trim().toUpperCase();
+  const err=document.getElementById('login-error');
+  if(!pseudo){err.textContent='Saisis ton prénom.';err.style.display='block';return;}
+  if(code!==INVITE_CODE){err.textContent='Code incorrect. Demande le code à Khalil.';err.style.display='block';return;}
+  err.style.display='none';
+  // Check if player already exists (same pseudo + code)
+  const existing=await sbFetch(`/rest/v1/players?pseudo=eq.${encodeURIComponent(pseudo)}&invite_code=eq.${code}&select=id,pseudo`);
+  let player;
+  if(existing&&existing.length>0){player=existing[0];}
+  else{
+    const created=await sbFetch('/rest/v1/players',{method:'POST',body:JSON.stringify({pseudo,invite_code:code})});
+    if(!created||!created.length){err.textContent='Erreur serveur. Réessaie.';err.style.display='block';return;}
+    player=created[0];
+  }
+  savePlayer(player);
+  initHome();
+  showScreen('screen-home');
+}
+
+function logout(){localStorage.removeItem('tep2_player');showScreen('screen-login');}
+
+async function saveScoreRemote(level,score,total,pct,durationSec){
+  const player=getPlayer();if(!player)return;
+  await sbFetch('/rest/v1/scores',{method:'POST',body:JSON.stringify({player_id:player.id,level,score,total,pct,duration_sec:durationSec})});
+  // Update XP + streak on player record
+  const today=new Date().toISOString().split('T')[0];
+  const p=getP();
+  const newXp=p.xp||0;
+  const lastPlayed=player.last_played;
+  const yesterday=new Date(Date.now()-86400000).toISOString().split('T')[0];
+  const newStreak=lastPlayed===yesterday?(player.streak||0)+1:lastPlayed===today?(player.streak||1):1;
+  await sbFetch(`/rest/v1/players?id=eq.${player.id}`,{method:'PATCH',body:JSON.stringify({xp:newXp,streak:newStreak,last_played:today}),headers:{'Prefer':'return=representation'}});
+  player.streak=newStreak;player.last_played=today;savePlayer(player);
+}
+
+async function renderLeaderboard(){
+  const lb=document.getElementById('lb-content');
+  lb.innerHTML='<div style="font-size:12px;color:var(--muted)">Chargement...</div>';
+  const data=await sbFetch('/rest/v1/leaderboard?select=*&order=best_level.desc,best_pct.desc');
+  if(!data||!data.length){lb.innerHTML='<div style="font-size:12px;color:var(--muted)">Aucun joueur encore. Partage le lien !</div>';return;}
+  const currentPlayer=getPlayer();
+  lb.innerHTML=data.map((p,i)=>{
+    const lv=LEVELS[(p.best_level||1)-1];
+    const isMe=currentPlayer&&p.player_id===currentPlayer.id;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);${isMe?'background:var(--bg);border-radius:8px;padding:8px;':''}">
+      <span style="font-size:16px;font-weight:900;color:var(--muted);min-width:20px">${i+1}</span>
+      <span style="font-size:20px">${lv.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">${p.pseudo}${isMe?' 👈':''}</div>
+        <div style="font-size:11px;color:var(--muted)">Niveau ${lv.name} · ${p.sessions} session${p.sessions>1?'s':''} · Moy. ${p.avg_pct}%</div>
+      </div>
+      <span style="font-size:14px;font-weight:800;color:${lv.tc}">${p.best_pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function initHome(){
+  const player=getPlayer();
+  const bar=document.getElementById('home-player-bar');
+  if(player){bar.style.display='flex';document.getElementById('home-player-name').textContent='👋 '+player.pseudo;}
+}
+
+const LEVELS=[
+  {id:1,name:"Débutant",icon:"🌱",color:"var(--green)",tc:"#00A550",timer:40,threshold:0,lv:"lv1",desc:"Définitions, notions de base, ordres de grandeur"},
+  {id:2,name:"Intermédiaire",icon:"📘",color:"var(--blue)",tc:"#0064A8",timer:30,threshold:60,lv:"lv2",desc:"Mécanismes financiers, stratégie et branches"},
+  {id:3,name:"Avancé",icon:"🔥",color:"var(--orange)",tc:"#F5800A",timer:25,threshold:70,lv:"lv3",desc:"Indicateurs précis, gestion de projet, stratégie groupe"},
+  {id:4,name:"Expert",icon:"🏆",color:"var(--red)",tc:"#E8002D",timer:15,threshold:80,lv:"lv4",desc:"Niveau entretien RH Groupe — précision et vitesse exigées"},
+  {id:5,name:"Hardcore",icon:"💀",color:"var(--purple)",tc:"#7C3AED",timer:8,threshold:90,lv:"lv5",desc:"Pour ceux qui pensent tout savoir — 8 secondes, pas de pitié"},
+];
+
+const CAT_LABELS={chiffres:"Chiffres TotalEnergies",finance:"Finance Corporate",strategie:"Stratégie Groupe",branches:"Branches TotalEnergies",projet:"Gestion de Projet",hardcore:"Hardcore"};
+const CAT_ICONS={chiffres:"📊",finance:"💰",strategie:"🌍",branches:"⚡",projet:"🎯",hardcore:"💀"};
+const CAT_COLORS={chiffres:"b-chiffres",finance:"b-finance",strategie:"b-strategie",branches:"b-branches",projet:"b-projet",hardcore:"b-branches"};
+const CAT_TC={chiffres:"var(--blue)",finance:"var(--green)",strategie:"var(--orange)",branches:"var(--purple)",projet:"var(--teal)",hardcore:"var(--purple)"};
+
+const Q={
+1:[ // DÉBUTANT (15 questions)
+  {cat:"chiffres",q:"Quel est le CFFO de TotalEnergies en 2025 ?",hint:"Cash Flow des Opérations — le chiffre le plus cité en entretien.",a:["27,8 Mds$","22,3 Mds$","31,4 Mds$","19,6 Mds$"],c:0,e:"CFFO 2025 : 27,8 Mds$."},
+  {cat:"chiffres",q:"Performance boursière de TotalEnergies en 2025 ?",hint:"À comparer avec les autres majors pétrolières.",a:["+8%","+20%","+14%","+31%"],c:1,e:"+20% en 2025."},
+  {cat:"chiffres",q:"Gearing de TotalEnergies fin 2025 ?",hint:"Ratio dette nette / capitaux propres.",a:["8,2%","22,1%","14,7%","31,5%"],c:2,e:"Gearing 14,7% — faible, signe de solidité financière."},
+  {cat:"finance",q:"Qu'est-ce que le gearing ?",hint:"Ratio d'endettement fondamental des groupes pétroliers.",a:["Ratio dividende / bénéfice par action","EBITDA / chiffre d'affaires","Coût moyen pondéré du capital","Dette nette / capitaux propres"],c:3,e:"Gearing = Dette nette / Capitaux propres."},
+  {cat:"finance",q:"Que signifie EBITDA ?",hint:"Earnings Before Interest, Taxes, Depreciation and Amortization.",a:["Earnings Before Interest Taxes Depreciation and Amortization","Equity Base Including Tax and Dividend Allocation","Estimated Budget Including Total Debt Amount","Earnings Before Income Tax Distribution Assessment"],c:0,e:"EBITDA = Résultat avant intérêts, impôts, dotations aux amortissements. Proxy du cash-flow opérationnel."},
+  {cat:"finance",q:"Qu'est-ce qu'un PPA ?",hint:"TotalEnergies en a signé avec Google, ByteDance, Microsoft.",a:["Planned Production Agreement","Power Purchase Agreement","Petroleum Production Allocation","Portfolio Performance Assessment"],c:1,e:"PPA = Power Purchase Agreement. Contrat d'achat d'électricité long terme."},
+  {cat:"strategie",q:"Projets majeurs de TotalEnergies en Namibie ?",hint:">1,5 milliards de barils de réserves potentielles.",a:["Oryx et Kalahari","Namib et Atlantic","Venus et Mopane","Orange et Kudu"],c:2,e:"Projets Venus et Mopane — FID attendues 2026-2028."},
+  {cat:"strategie",q:"Stratégie TotalEnergies face à la transition énergétique ?",hint:"Modèle différencié vs BP et Shell.",a:["Sortie totale des hydrocarbures d'ici 2035","Focalisation exclusive sur le GNL","Recentrage sur l'upstream pétrole","Hydrocarbures financent électricité et renouvelables"],c:3,e:"Modèle multi-énergie : les hydrocarbures (cash machine) financent la croissance dans l'électricité, le GNL et les renouvelables."},
+  {cat:"chiffres",q:"Coût de production Upstream TotalEnergies 2025 ?",hint:"L'un des plus bas de l'industrie — exprimé en $/boe.",a:["5$/boe","3$/boe","8$/boe","12$/boe"],c:0,e:"5$/boe — très compétitif parmi les majors pétrolières."},
+  {cat:"strategie",q:"Qu'est-ce que le GNL ?",hint:"Axe de croissance majeur dans la stratégie TotalEnergies.",a:["Gestion Numérique des Liquidités","Gaz Naturel Liquéfié","Garantie de Non-Livraison","Gestion des Niveaux de Liquidité"],c:1,e:"GNL = Gaz Naturel Liquéfié. TotalEnergies est l'un des leaders mondiaux."},
+  {cat:"branches",q:"Que fait la branche EV (Electric Vehicles) de TotalEnergies ?",hint:"Inclut notamment la recharge des véhicules électriques.",a:["Fabrique des véhicules électriques","Vend des batteries aux constructeurs auto","Développe et opère des infrastructures de recharge pour véhicules électriques","Gère les flottes électriques des filiales"],c:2,e:"La branche EV développe et opère des bornes de recharge (CPO/MSP), des solutions de charge intelligente et des services associés."},
+  {cat:"branches",q:"Qu'est-ce que le SAF dans le portefeuille TotalEnergies ?",hint:"Concerne le secteur aérien.",a:["Système d'Analyse Financière","Service d'Affrètement de Flotte","Syndicat des Actifs Fixes","Sustainable Aviation Fuel — carburant aviation durable"],c:3,e:"SAF = Sustainable Aviation Fuel. Carburant durable pour l'aviation, produit à partir de matières résiduelles ou renouvelables."},
+  {cat:"projet",q:"Que signifie l'acronyme SCRUM ?",hint:"Framework de développement agile.",a:["Framework agile itératif basé sur des sprints et des rôles définis","Strategic Corporate Resource Unified Method","Software Control and Release Update Management","Structured Continuous Review and Update Model"],c:0,e:"Scrum est un framework agile organisé en sprints (itérations) avec des rôles clés : Product Owner, Scrum Master, équipe de développement."},
+  {cat:"projet",q:"Qu'est-ce qu'un Product Owner (PO) dans un projet agile ?",hint:"Rôle clé entre le métier et l'équipe technique.",a:["Le chef de projet traditionnel qui gère le budget","Le responsable de la vision produit et du backlog","Le développeur senior référent technique","Le client final du produit"],c:1,e:"Le PO représente les besoins métier, priorise le backlog et s'assure que l'équipe livre de la valeur."},
+  {cat:"projet",q:"Qu'est-ce qu'un sprint en méthode agile ?",hint:"Unité de temps de base dans Scrum.",a:["Une réunion hebdomadaire de statut projet","Un document de planification trimestriel","Une itération de travail courte et fixe (1-4 semaines) avec un livrable défini","Une revue de performance de l'équipe"],c:2,e:"Un sprint est une itération de 1 à 4 semaines avec un objectif clair et un livrable potentiellement shippable."},
+],
+2:[ // INTERMÉDIAIRE (15 questions)
+  {cat:"chiffres",q:"Résultat net ajusté TotalEnergies 2025 ?",hint:"Exclut les éléments exceptionnels — performance récurrente.",a:["12,1 Mds$","18,3 Mds$","21,2 Mds$","15,6 Mds$"],c:3,e:"Résultat net ajusté 2025 : 15,6 Mds$."},
+  {cat:"chiffres",q:"CAPEX net TotalEnergies 2025 ?",hint:"Investissements nets du groupe.",a:["17,1 Mds$","14,2 Mds$","20,5 Mds$","11,8 Mds$"],c:0,e:"CAPEX net 2025 : 17,1 Mds$."},
+  {cat:"finance",q:"Que mesure le ROACE ?",hint:"Indicateur phare de rentabilité pour les majors pétroliers.",a:["Rentabilité des actions cotées","Retour sur capitaux employés en moyenne","Rentabilité nette après impôts","Ratio de couverture des intérêts"],c:1,e:"ROACE = Return On Average Capital Employed. Résultat net opérationnel / Capitaux employés moyens."},
+  {cat:"finance",q:"Qu'est-ce que le boe ?",hint:"TotalEnergies affiche un coût de production à 5 de cette unité.",a:["Balance of Earnings","Base Operating Expenditure","Barrel of Oil Equivalent","Budget of Operations Estimate"],c:2,e:"boe = Barrel of Oil Equivalent. Permet de comparer différentes sources d'énergie."},
+  {cat:"finance",q:"Différence entre résultat net et résultat net ajusté ?",hint:"L'ajusté reflète la vraie performance opérationnelle récurrente.",a:["Aucune différence — termes synonymes","L'ajusté inclut les dividendes des filiales","L'ajusté est calculé avant impôts","L'ajusté exclut les éléments exceptionnels (dépréciations, plus-values...)"],c:3,e:"Le résultat net ajusté exclut les éléments non récurrents pour refléter la performance opérationnelle."},
+  {cat:"strategie",q:"Programme d'économies TotalEnergies 2026-2030 ?",hint:"Engagement de discipline des coûts.",a:["12,5 Mds$","5 Mds$","8,5 Mds$","20 Mds$"],c:0,e:"12,5 Mds$ d'économies sur 2026-2030."},
+  {cat:"strategie",q:"Deal EPH : combien de GW acquis ?",hint:"Acquisition dans l'électricité en Europe.",a:["5 GW","14 GW","10 GW","20 GW"],c:1,e:"~14 GW de capacité électrique en Europe via le deal EPH."},
+  {cat:"strategie",q:"PPAs tech signés par TotalEnergies pour les datacenters ?",hint:">4 GW au total — convergence énergie × IA.",a:["Amazon, Meta, Apple","Netflix, Salesforce, Oracle","Google, ByteDance, Microsoft","IBM, SAP, Tesla"],c:2,e:"Google, ByteDance et Microsoft — >4 GW de Power Purchase Agreements."},
+  {cat:"finance",q:"Qu'est-ce que le Free Cash Flow (FCF) ?",hint:"Différence entre deux grands agrégats financiers.",a:["Résultat net - dividendes versés","EBITDA - intérêts financiers","Chiffre d'affaires - coûts opérationnels","Cash flow opérationnel - CAPEX"],c:3,e:"FCF = Cash flow opérationnel - CAPEX. Argent disponible après investissements."},
+  {cat:"branches",q:"Qu'est-ce qu'un CPO dans le secteur EV ?",hint:"Rôle clé dans l'écosystème de recharge.",a:["Charge Point Operator — opérateur de bornes de recharge","Chief Project Officer","Central Payment Organization","Corporate Power Officer"],c:0,e:"CPO = Charge Point Operator. Opérateur qui installe et gère des bornes de recharge. TotalEnergies est CPO via sa branche EV."},
+  {cat:"branches",q:"Qu'est-ce que le protocole OCPP ?",hint:"Standard de communication dans l'infrastructure de recharge EV.",a:["Oil Control Pipeline Protocol","Open Charge Point Protocol — standard de communication borne / système de gestion","Offshore Carbon Processing Platform","Optional Charging Power Profile"],c:1,e:"OCPP = Open Charge Point Protocol. Protocole de communication entre les bornes et le système backend de supervision (CSMS)."},
+  {cat:"branches",q:"Quelle branche TotalEnergies gère les lubrifiants ?",hint:"Marque grand public connue de tous.",a:["TotalEnergies Marketing","TotalEnergies Upstream","TotalEnergies Lubrifiants (marque Total Quartz, Hi-Perf)","TotalEnergies Renewables"],c:2,e:"TotalEnergies commercialise les lubrifiants sous la marque Total (Quartz, Hi-Perf...) — business très rentable et mondial."},
+  {cat:"projet",q:"Qu'est-ce que le backlog dans un projet agile ?",hint:"Liste centrale de tout ce qu'il faut faire.",a:["Le budget prévisionnel du projet","Le compte-rendu des rétrospectives","Le planning Gantt de l'équipe","La liste priorisée de toutes les fonctionnalités et tâches à réaliser"],c:3,e:"Le backlog est la liste priorisée par le PO de tout ce que l'équipe doit réaliser. Il évolue continuellement."},
+  {cat:"projet",q:"Qu'est-ce qu'un KPI ?",hint:"Outil fondamental de pilotage de projet.",a:["Key Performance Indicator — indicateur clé de performance","Key People Initiative","Knowledge Process Integration","Keep Project Informed"],c:0,e:"KPI = Key Performance Indicator. Mesure quantifiable d'un objectif. Ex : taux de livraison dans les délais, qualité, coût."},
+  {cat:"projet",q:"Quelle est la différence entre un projet et un programme ?",hint:"Question classique en entretien de chef de projet.",a:["Aucune — termes interchangeables","Un programme est un ensemble de projets liés coordonnés pour un bénéfice stratégique commun","Un programme est simplement un projet plus long","Un projet a un budget, un programme n'en a pas"],c:1,e:"Un programme = ensemble de projets interdépendants pilotés ensemble pour atteindre un bénéfice stratégique. Un projet est plus ponctuel."},
+],
+3:[ // AVANCÉ (15 questions)
+  {cat:"chiffres",q:"ROACE TotalEnergies 2025 et sa particularité ?",hint:"Comparaison avec les majors pétrolières mondiales.",a:["9,4% — dans la moyenne","15,1% — record historique","12,6% — meilleur des majors 4 ans consécutifs","10,8% — en progression"],c:2,e:"ROACE 12,6%, meilleur des majors 4 ans consécutifs."},
+  {cat:"finance",q:"Qu'est-ce que le WACC / CMPC ?",hint:"Taux utilisé dans les valorisations DCF.",a:["Ratio de couverture de la dette","Taux de croissance long terme","Capitalisation boursière normalisée","Coût moyen pondéré du capital (dettes + fonds propres)"],c:3,e:"WACC = Weighted Average Cost of Capital. Taux de rentabilité minimum exigé par les financeurs de l'entreprise."},
+  {cat:"finance",q:"Qu'est-ce que le ratio P/E ?",hint:"Ratio de valorisation boursière le plus utilisé.",a:["Prix de l'action / Bénéfice par action","EBITDA / capitalisation boursière","Dividende / cours de bourse","Chiffre d'affaires / nombre d'actions"],c:0,e:"P/E = Prix de l'action / Bénéfice par action. Ce que le marché est prêt à payer pour 1€ de bénéfice."},
+  {cat:"strategie",q:"Horizon FID pour Venus et Mopane en Namibie ?",hint:"Final Investment Decision — décision majeure d'investissement.",a:["Déjà prises en 2024","2026-2028","2030-2032","Pas encore fixé"],c:1,e:"FID attendues entre 2026 et 2028. Plus de 1,5 Mds barils de réserves potentielles."},
+  {cat:"strategie",q:"Breakeven TotalEnergies pour couvrir dividende + CAPEX ?",hint:"Indicateur de résilience aux cycles pétroliers bas.",a:["~20$/baril","~65$/baril","~40$/baril","~80$/baril"],c:2,e:"Breakeven ~40$/baril — permet de maintenir dividende et CAPEX même en prix bas."},
+  {cat:"strategie",q:"Ambition TotalEnergies sur les renouvelables à horizon 2030 ?",hint:"Chiffre en GW communiqué au marché.",a:["<5 GW — présence symbolique","Leader mondial >100 GW","Retrait progressif au profit du GNL","35+ GW en 2030"],c:3,e:"TotalEnergies vise 35+ GW de capacité renouvelable d'ici 2030, financée par les cash-flows hydrocarbures."},
+  {cat:"branches",q:"Qu'est-ce qu'un MSP dans l'EV ?",hint:"Rôle complémentaire du CPO dans l'écosystème de recharge.",a:["Mobility Service Provider — fournisseur de services de mobilité pour les conducteurs","Main Service Provider","Managed System Platform","Multi-Site Provider"],c:0,e:"MSP = Mobility Service Provider. Fournit aux conducteurs l'accès à des réseaux de recharge via une carte ou une app (comme TotalEnergies Charge)."},
+  {cat:"branches",q:"Qu'est-ce que le protocole OCPI dans le secteur EV ?",hint:"Protocole complémentaire à l'OCPP — communication entre réseaux de recharge.",a:["Open Charge Point Infrastructure","Open Charge Point Interface — protocole de roaming entre CPO et MSP","Oil Control Pipeline Interface","Optional Charging Power Indicator"],c:1,e:"OCPI = Open Charge Point Interface. Protocole de roaming entre réseaux CPO/MSP — permet à un conducteur de charger sur n'importe quel réseau partenaire."},
+  {cat:"branches",q:"Qu'est-ce que le Plug & Charge (ISO 15118) ?",hint:"Innovation dans la recharge EV haute puissance.",a:["Câble universel pour toutes les bornes","Protocole de facturation unifié","Authentification automatique du véhicule pour la recharge sans carte ni app","Standard de prise Type 2"],c:2,e:"Plug & Charge (ISO 15118) : le véhicule s'authentifie automatiquement dès la connexion. Pas de badge, pas d'app. Expérience fluide."},
+  {cat:"projet",q:"Qu'est-ce qu'une rétrospective en Scrum ?",hint:"Cérémonie de clôture de sprint.",a:["Réunion de présentation des résultats aux stakeholders","Point de mi-sprint pour ajuster les priorités","Revue du budget du sprint","Cérémonie d'amélioration continue — l'équipe identifie ce qui a bien/mal fonctionné"],c:3,e:"La rétrospective a lieu à la fin de chaque sprint. L'équipe identifie les points positifs, les problèmes et les actions d'amélioration."},
+  {cat:"projet",q:"Qu'est-ce qu'une matrice RACI ?",hint:"Outil de gouvernance de projet.",a:["Responsible Accountable Consulted Informed — outil de clarification des rôles","Risks Actions Costs Impacts — registre de risques","Resources Allocation Control Index — suivi budget","Review Acceptance Control Integration"],c:0,e:"RACI : Responsible (fait le travail), Accountable (responsable final), Consulted (consulté), Informed (informé). Clarifie qui fait quoi."},
+  {cat:"projet",q:"Qu'est-ce que la méthode du chemin critique (CPM) ?",hint:"Outil de planification de projet.",a:["La liste des risques critiques du projet","La séquence de tâches la plus longue déterminant la durée totale du projet","Le budget alloué aux tâches prioritaires","L'ensemble des jalons d'un projet"],c:1,e:"Le chemin critique = séquence de tâches la plus longue. Tout retard sur une tâche du chemin critique retarde l'ensemble du projet."},
+  {cat:"finance",q:"Qu'est-ce qu'un DCF ?",hint:"Méthode de valorisation fondamentale en finance corporate.",a:["Debt Coverage Factor","Dividend Capitalization Formula","Discounted Cash Flow — flux de trésorerie actualisés","Depreciation & Cost Factor"],c:2,e:"DCF = Discounted Cash Flow. Valorise une entreprise en actualisant ses flux futurs au WACC."},
+  {cat:"chiffres",q:"Combien de GW de PPAs TotalEnergies a-t-il signé avec les géants tech ?",hint:"Google, ByteDance, Microsoft.",a:[">1 GW",">2 GW",">10 GW",">4 GW"],c:3,e:">4 GW de PPAs pour alimenter des datacenters."},
+  {cat:"strategie",q:"Politique de rémunération actionnaires TotalEnergies ?",hint:"Mix deux composantes — signal de confiance au marché.",a:["Dividende progressif + rachats d'actions variables selon le prix du pétrole","Dividende uniquement","Pas de dividende — réinvestissement total","Dividende fixe indépendant des résultats"],c:0,e:"Dividende progressif + rachats d'actions variables (breakeven ~40$/bbl)."},
+],
+4:[ // EXPERT (15 questions)
+  {cat:"chiffres",q:"Citez les 3 chiffres clés TotalEnergies 2025 (CFFO, résultat net ajusté, ROACE).",hint:"Les 3 essentiels pour tout entretien — à réciter de mémoire.",a:["CFFO 22,3 Mds$ / RN ajusté 18 Mds$ / ROACE 10%","CFFO 27,8 Mds$ / RN ajusté 15,6 Mds$ / ROACE 12,6%","CFFO 31 Mds$ / RN ajusté 15,6 Mds$ / ROACE 14%","CFFO 27,8 Mds$ / RN ajusté 12 Mds$ / ROACE 12,6%"],c:1,e:"CFFO 27,8 Mds$ — RN ajusté 15,6 Mds$ — ROACE 12,6%. À mémoriser."},
+  {cat:"finance",q:"Formule exacte du ROACE ?",hint:"Niveau entretien financier exigeant.",a:["Résultat net / Total actif","EBITDA / Dette nette","Résultat net opérationnel après impôts / Capitaux employés moyens","FCF / Capitalisation boursière"],c:2,e:"ROACE = RNOAI (Résultat Net Opérationnel Après Impôts) / Capitaux Employés Moyens."},
+  {cat:"finance",q:"Si WACC = 8% et ROACE = 12%, que peut-on conclure ?",hint:"Logique de création de valeur économique.",a:["Le projet détruit de la valeur","Le projet est neutre","Impossible à conclure sans le FCF","Le projet crée de la valeur économique (ROACE > WACC)"],c:3,e:"ROACE (12%) > WACC (8%) → création de valeur. L'entreprise génère plus que son coût du capital."},
+  {cat:"strategie",q:"Lien entre la stratégie namibienne et la politique de dividende ?",hint:"Réflexion stratégique intégrée — niveau CODIR.",a:["Le cash des hydrocarbures actuels finance le dividende pendant que Namibie mûrit","Aucun lien direct","Les revenus namibiens financeront les dividendes dès la FID","La Namibie remplacera le GNL dans le mix"],c:0,e:"Les hydrocarbures en production financent le dividende (breakeven 40$) pendant que les grands projets (Namibie) préparent la croissance future."},
+  {cat:"finance",q:"Taux d'actualisation DCF pour un major pétrolier intégré ?",hint:"Lien entre WACC et profil de risque sectoriel.",a:["5% — taux sans risque actuel","8-10% — WACC d'un major pétrolier intégré","15% — risque élevé","3% — coût de la dette uniquement"],c:1,e:"WACC 8-10% pour un major pétrolier : taux sans risque (~4%) + prime de marché × bêta sectoriel (~0.8-1.0)."},
+  {cat:"strategie",q:"Différenciateur TotalEnergies vs BP et Shell sur la transition ?",hint:"Choix stratégique distinctif pris en 2023.",a:["TotalEnergies a abandonné les renouvelables","TotalEnergies a fusionné avec un acteur renouvelable","TotalEnergies maintient croissance hydrocarbures ET renouvelables, là où BP/Shell ont ralenti","TotalEnergies se concentre sur le nucléaire"],c:2,e:"BP/Shell ont réduit leurs ambitions renouvelables sous pression des actionnaires. TotalEnergies maintient sa double trajectoire : croissance hydrocarbures (Namibie, GNL) + renouvelables (35 GW 2030)."},
+  {cat:"branches",q:"Qu'est-ce que le protocole ISO 15118 et pourquoi est-il stratégique pour TotalEnergies EV ?",hint:"Lien avec la facturation automatique et l'expérience conducteur.",a:["Standard de prise de recharge en Europe","Norme de sécurité des bornes en milieu public","Protocole de paiement NFC pour les bornes","Protocole d'authentification automatique (Plug & Charge) et de communication intelligente véhicule-borne"],c:3,e:"ISO 15118 = Plug & Charge + V2G. Authentification auto du véhicule, facturation transparente, préparation au Vehicle-to-Grid. Différenciateur fort pour TotalEnergies EV."},
+  {cat:"branches",q:"Quelle est la différence entre le Autocharge et le Plug & Charge ?",hint:"Deux approches d'authentification automatique — une est standardisée.",a:["Autocharge utilise l'ID du câble (EVSE/MAC), Plug & Charge utilise les certificats PKI (ISO 15118) — plus sécurisé","Ce sont deux noms pour la même chose","Autocharge est réservé aux flottes, Plug & Charge aux particuliers","Plug & Charge est la version européenne d'Autocharge"],c:0,e:"Autocharge : identification via MAC address du câble — simple mais moins sécurisé. Plug & Charge (ISO 15118) : certificats PKI embarqués dans le véhicule — standard industriel sécurisé."},
+  {cat:"projet",q:"Comment gérez-vous un projet quand un livrable clé est en retard sur le chemin critique ?",hint:"Question d'entretien chef de projet niveau senior.",a:["Attendre et informer le client","Analyser l'impact, fast-track ou crash les tâches, replanifier et communiquer aux parties prenantes","Escalader immédiatement à la direction","Déprioriser les autres projets"],c:1,e:"En cas de retard sur le chemin critique : 1) Quantifier l'écart. 2) Fast-track (paralléliser) ou Crash (ajouter ressources). 3) Replanifier. 4) Communiquer aux stakeholders avec impact / options / recommandation."},
+  {cat:"projet",q:"Qu'est-ce que la vélocité dans un projet agile ?",hint:"Métrique de capacité de l'équipe.",a:["La vitesse de développement d'un développeur","Le temps moyen de livraison d'une feature","La quantité de story points réalisée en moyenne par sprint — sert à planifier","Le nombre de bugs corrigés par sprint"],c:2,e:"La vélocité = story points livrés en moyenne par sprint. Permet de prédire la capacité future et d'affiner le planning."},
+  {cat:"projet",q:"Qu'est-ce qu'un risk register ?",hint:"Outil fondamental de gestion des risques projet.",a:["Le budget de contingence","La liste des réunions de suivi","Le log des décisions prises","Le registre des risques : identification, probabilité, impact, mitigation, responsable"],c:3,e:"Le risk register identifie chaque risque avec : probabilité × impact = exposition, plan de mitigation et responsable. Mis à jour à chaque sprint/revue."},
+  {cat:"finance",q:"Brent à 50$, breakeven TotalEnergies à 40$ : quelle est la marge disponible et à quoi sert-elle ?",hint:"Logique de résilience financière.",a:["10$/baril de marge — dividende et CAPEX couverts, FCF positif disponible pour rachats","Dividende en danger immédiat","Break-even atteint — résultat nul","Réduction automatique du CAPEX"],c:0,e:"À 50$/bbl avec breakeven 40$ : 10$/bbl de marge. Dividende et CAPEX couverts, FCF restant pour rachats d'actions ou investissements opportunistes."},
+  {cat:"chiffres",q:"Gearing cible à moyen terme pour TotalEnergies ?",hint:"Objectif de structure financière communiqué au marché.",a:["<5%","<20%","<30%","<10%"],c:1,e:"TotalEnergies cible un gearing <20% — 14,7% en 2025, bien dans la cible."},
+  {cat:"projet",q:"Comment priorisez-vous un backlog avec des contraintes conflictuelles (délai, coût, scope) ?",hint:"Triangle contraintes projet — niveau senior.",a:["Toujours prioriser le délai avant tout","Laisser l'équipe décider","Utiliser la valeur métier × effort : maximiser le ratio valeur/effort, en concertation avec le PO et les stakeholders","Prioriser selon le budget disponible uniquement"],c:2,e:"Priorisation backlog : valeur métier (impact) / effort (complexité) = priorité. Techniques : MoSCoW, WSJF, ICE Score. Toujours en concertation avec PO et stakeholders."},
+  {cat:"branches",q:"Qu'est-ce que le Vehicle-to-Grid (V2G) et pourquoi TotalEnergies EV y investit ?",hint:"Utilisation bidirectionnelle de la batterie du véhicule.",a:["Technologie pour recharger plus vite","Système de navigation intégré au chargeur","Standard de connexion entre véhicule et réseau mobile","Capacité d'un VE à restituer de l'énergie au réseau — flexibilité énergétique et revenus pour le conducteur"],c:3,e:"V2G = Vehicle-to-Grid. Le VE peut renvoyer de l'énergie au réseau. Bénéfices : stabilisation réseau, revenus pour le conducteur, optimisation énergetique. Axe stratégique pour TotalEnergies EV."},
+],
+5:[ // HARDCORE (15 questions — 8s, pièges, précision extrême)
+  {cat:"chiffres",q:"TotalEnergies 2025 : CFFO = 27,8 Mds$ et RN ajusté = 15,6 Mds$. Quel est le ratio RN ajusté / CFFO approximatif ?",hint:"Calcul mental — ratio de conversion du cash en résultat.",a:["~36%","~56%","~72%","~44%"],c:1,e:"15,6 / 27,8 ≈ 56%. Cela mesure la part du cash opérationnel qui devient du résultat net ajusté — utile pour comparer l'efficacité entre majors."},
+  {cat:"finance",q:"Un projet a un ROACE de 9% et le WACC est de 10%. Que faut-il conclure ?",hint:"Comparez ROACE et WACC — piège classique.",a:["Le projet crée de la valeur — 9% c'est bon","Le projet détruit de la valeur (ROACE < WACC)","On ne peut rien conclure sans le FCF","Le projet est rentable car ROACE > 0"],c:1,e:"ROACE (9%) < WACC (10%) → destruction de valeur économique. Même si le projet est profitable en absolu, il ne génère pas assez pour rémunérer les investisseurs."},
+  {cat:"strategie",q:"Si le Brent chute à 30$/baril pendant 2 ans, TotalEnergies peut-il maintenir son dividende ?",hint:"Breakeven à ~40$/baril — mais quelle est la vraie marge de manœuvre ?",a:["Non — en dessous du breakeven, dividende supprimé immédiatement","Oui — grâce aux réserves de cash, au bilan solide (gearing 14,7%) et à la flexibilité du CAPEX","Oui — le GNL compense intégralement la perte Upstream","Non — la dette exploserait immédiatement"],c:1,e:"À 30$/bbl, TotalEnergies est sous son breakeven mais peut puiser dans son bilan (gearing faible), réduire le CAPEX discrétionnaire et utiliser les couvertures. Le dividende progressif a déjà résisté à la crise 2020."},
+  {cat:"branches",q:"Quelle est la différence technique entre OCPP 1.6 et OCPP 2.0.1 ?",hint:"Évolution majeure du protocole — impact sur le Smart Charging et la sécurité.",a:["OCPP 2.0.1 ajoute le support du Plug & Charge (ISO 15118), la sécurité end-to-end et le device management avancé","OCPP 2.0.1 est juste une mise à jour mineure de format","OCPP 1.6 supporte déjà l'ISO 15118 nativement","OCPP 2.0.1 abandonne le protocole JSON pour passer à XML"],c:0,e:"OCPP 2.0.1 apporte : ISO 15118 (Plug & Charge), sécurité TLS améliorée, device management avancé, smart charging granulaire. Transition critique pour les CPOs comme TotalEnergies EV."},
+  {cat:"projet",q:"Dans un projet Agile, un sponsor demande d'ajouter une feature majeure en milieu de sprint. Que faites-vous ?",hint:"Sacro-saint principe Scrum — intégrité du sprint.",a:["Vous l'intégrez immédiatement — le client est prioritaire","Vous refusez catégoriquement et sans discussion","Vous expliquez l'impact sur le sprint actuel, proposez de l'ajouter au prochain sprint backlog en concertation avec le PO","Vous découpez le sprint en deux pour l'intégrer"],c:2,e:"En Scrum, le sprint est protégé. On n'ajoute pas de travail en cours de sprint sauf urgence absolue. La bonne réponse : transparence sur l'impact, ajout au backlog priorisé pour le sprint suivant, décision PO + Sponsor."},
+  {cat:"chiffres",q:"TotalEnergies vise 35+ GW de renouvelables en 2030. En 2025, la capacité installée est ~20 GW. Quel CAGR approximatif faut-il pour atteindre 35 GW ?",hint:"CAGR = Compound Annual Growth Rate sur 5 ans.",a:["~3% par an","~7% par an","~12% par an","~20% par an"],c:1,e:"(35/20)^(1/5) - 1 ≈ 11,8% → ~12% par an. En réalité TotalEnergies cible ~10-12% CAGR sur les renouvelables — cohérent avec la feuille de route."},
+  {cat:"finance",q:"Qu'est-ce que l'EVA (Economic Value Added) et en quoi diffère-t-il du résultat net ?",hint:"Mesure de la vraie création de valeur économique.",a:["EVA = Résultat net - impôts. Identique au RN ajusté","EVA = NOPAT - (WACC × Capitaux Employés). Mesure la valeur créée au-delà du coût du capital","EVA = EBITDA - Amortissements. Proche de l'EBIT","EVA = FCF - Dividendes. Mesure le cash résiduel"],c:1,e:"EVA = Net Operating Profit After Tax - (WACC × Capital Employed). Un RN positif peut coexister avec un EVA négatif si le coût du capital n'est pas couvert. TotalEnergies pilote sa stratégie sur le ROACE vs WACC, équivalent à l'EVA."},
+  {cat:"strategie",q:"Pourquoi TotalEnergies n'a-t-il pas rebaptisé ses activités 'fossil-free' comme certains pairs ?",hint:"Positionnement de marque et stratégie de communication.",a:["Par conservatisme marketing — manque d'ambition sur la transition","Stratégie délibérée : assumer le modèle multi-énergie, crédibilité vs greenwashing, et maintenir la confiance des investisseurs pétroliers","Par obligation réglementaire française","Pour éviter de payer des redevances de marque"],c:1,e:"TotalEnergies assume son modèle multi-énergie : pas de promesse 'fossil-free' non tenue. Crédibilité > greenwashing. Les investisseurs pétroliers restent actionnaires car le modèle est clair. Stratégie de long terme vs communication court-termiste."},
+  {cat:"branches",q:"Qu'est-ce que le 'roaming' EV et comment TotalEnergies EV le monétise-t-il ?",hint:"Interopérabilité entre réseaux de recharge — modèle économique.",a:["Le roaming EV est gratuit — pas de monétisation possible","TotalEnergies EV monétise via des frais d'interchange (B2B entre CPO et MSP) et des abonnements MSP permettant l'accès multi-réseau","Le roaming n'existe pas encore — chaque réseau est fermé","TotalEnergies facture directement les utilisateurs d'autres réseaux"],c:1,e:"Le roaming EV fonctionne comme le roaming téléphonique : frais d'interchange CPO→MSP. TotalEnergies EV est à la fois CPO (revenus borne) et MSP (abonnements conducteurs). Modèle B2B + B2C."},
+  {cat:"projet",q:"Qu'est-ce que le WSJF (Weighted Shortest Job First) et quand l'utilise-t-on ?",hint:"Méthode de priorisation SAFe — au-delà du Scrum classique.",a:["Une méthode de gestion des risques projets","Une technique de priorisation agile à l'échelle : (Valeur + Urgence + Réduction risque) / Taille. Maximise le débit de valeur","Une cérémonie de planification trimestrielle (PI Planning)","Un outil de reporting Jira pour les équipes distribuées"],c:1,e:"WSJF = Weighted Shortest Job First. Score = (Business Value + Time Criticality + Risk Reduction) / Job Size. Priorise les petits jobs à forte valeur. Utilisé en SAFe pour la priorisation au niveau programme."},
+  {cat:"chiffres",q:"En 2025, TotalEnergies a un CAPEX net de 17,1 Mds$ et un CFFO de 27,8 Mds$. Quel est le FCF approximatif ?",hint:"FCF = CFFO - CAPEX. Calcul direct.",a:["~5 Mds$","~10,7 Mds$","~15 Mds$","~8,3 Mds$"],c:1,e:"FCF = 27,8 - 17,1 = 10,7 Mds$. Ce FCF finance les dividendes et les rachats d'actions. Avec un dividende ~8 Mds$, il reste ~2,7 Mds$ pour les rachats."},
+  {cat:"finance",q:"Qu'est-ce que la dette hybride et pourquoi TotalEnergies en émet ?",hint:"Instrument de financement à mi-chemin entre dette et capital.",a:["Une dette à taux variable indexée sur le pétrole","Un instrument traité à 50% comme dette et 50% comme capitaux propres par les agences de notation — améliore le gearing sans diluer les actionnaires","Une dette subordonnée aux fournisseurs uniquement","Un emprunt interbancaire à court terme"],c:1,e:"La dette hybride (obligations perpétuelles subordonnées) est comptabilisée partiellement en fonds propres par S&P/Moody's. Permet à TotalEnergies d'améliorer son ratio gearing sans émettre des actions — outil de gestion du bilan."},
+  {cat:"strategie",q:"Quel est le risque principal de la stratégie 'double trajectoire' de TotalEnergies (hydrocarbures + renouvelables) ?",hint:"Analyse critique du modèle — niveau CODIR.",a:["Le risque est nul — c'est la meilleure stratégie possible","Risque de stranded assets si la transition s'accélère, et risque de dilution stratégique si les deux activités se cannibalisent en capital","Le risque principal est la concurrence des majors américaines","Risque de surproduction GNL en 2030"],c:1,e:"Stranded assets : si le pétrole devient non rentable plus vite que prévu, les investissements Upstream sont perdus. Dilution stratégique : vouloir tout faire peut conduire à ne rien faire exceptionnellement bien. C'est le débat BP/Shell vs TotalEnergies."},
+  {cat:"branches",q:"Dans un projet de déploiement de bornes EV, quels sont les 3 risques critiques à identifier en priorité ?",hint:"Question chef de projet niveau senior dans le secteur EV.",a:["Budget dépassé, délai retardé, qualité insuffisante","Délai de raccordement réseau électrique, homologation OCPP/réglementaire, et adoption utilisateurs (utilisation réelle vs prévisionnelle)","Manque de développeurs, bug logiciel, mauvais marketing","Concurrence des autres CPOs, prix de l'électricité, météo"],c:1,e:"Les 3 risques critiques d'un projet EV : 1) Raccordement réseau (ENEDIS/gestionnaire réseau — délais 6-18 mois). 2) Conformité OCPP/réglementaire (AFIR, calibration). 3) Adoption : une borne installée non utilisée ne génère pas de revenus."},
+  {cat:"chiffres",q:"Si TotalEnergies maintient son ROACE à 12,6% sur 5 ans avec des capitaux employés moyens de 120 Mds$, quel est le RNOAI annuel approximatif ?",hint:"Application directe de la formule ROACE.",a:["~10 Mds$","~15,1 Mds$","~8,5 Mds$","~20 Mds$"],c:1,e:"RNOAI = ROACE × Capitaux Employés = 12,6% × 120 = 15,12 Mds$ ≈ 15,1 Mds$. Cohérent avec le RN ajusté 2025 de 15,6 Mds$."},
+],
+};
+
+const MEMO={
+  chiffres:[
+    {k:"CFFO 2025",v:"27,8 Mds$",e:"Cash Flow des Opérations — indicateur clé n°1"},
+    {k:"Résultat net ajusté 2025",v:"15,6 Mds$",e:"Hors éléments exceptionnels"},
+    {k:"ROACE 2025",v:"12,6%",e:"Meilleur des majors 4 ans consécutifs"},
+    {k:"CAPEX net 2025",v:"17,1 Mds$",e:"Investissements nets"},
+    {k:"Gearing 2025",v:"14,7%",e:"Dette nette / Capitaux propres — cible <20%"},
+    {k:"Performance boursière 2025",v:"+20%",e:"Surperformance vs pairs"},
+    {k:"Coût production Upstream",v:"5$/boe",e:"L'un des plus bas de l'industrie"},
+    {k:"Breakeven dividende + CAPEX",v:"~40$/baril",e:"Résilience aux cycles bas"},
+    {k:"Deal EPH",v:"~14 GW",e:"Capacité électrique acquise en Europe"},
+    {k:"PPAs tech",v:">4 GW",e:"Google, ByteDance, Microsoft — datacenters"},
+  ],
+  finance:[
+    {k:"CFFO",v:"Cash Flow des Opérations",e:"Capacité bénéficiaire opérationnelle"},
+    {k:"EBITDA",v:"Earnings Before Interest Taxes Depreciation & Amortization",e:"Proxy du cash-flow opérationnel — NE PAS confondre avec Equity"},
+    {k:"ROACE",v:"RNOAI / Capitaux Employés Moyens",e:"Efficacité d'utilisation du capital"},
+    {k:"Gearing",v:"Dette nette / Capitaux propres",e:"Ratio d'endettement"},
+    {k:"WACC / CMPC",v:"Coût moyen pondéré du capital",e:"Taux d'actualisation DCF — ~8-10% pour un major"},
+    {k:"DCF",v:"Discounted Cash Flow",e:"Valorisation par actualisation des flux futurs au WACC"},
+    {k:"FCF",v:"Cash flow opérationnel - CAPEX",e:"Argent disponible après investissements"},
+    {k:"P/E",v:"Prix action / BPA",e:"Multiple de valorisation boursière"},
+    {k:"boe",v:"Barrel of Oil Equivalent",e:"Unité de comparaison entre énergies"},
+    {k:"PPA",v:"Power Purchase Agreement",e:"Contrat d'achat d'électricité long terme"},
+  ],
+  strategie:[
+    {k:"Modèle multi-énergie",v:"Hydrocarbures + Électricité + GNL + Renouvelables",e:"Différenciateur vs BP/Shell"},
+    {k:"Projets Namibie",v:"Venus + Mopane",e:">1,5 Mds barils — FID 2026-2028"},
+    {k:"GNL",v:"Gaz Naturel Liquéfié",e:"Axe de croissance stratégique — leader mondial"},
+    {k:"Deal EPH",v:"~14 GW en Europe",e:"Pivot accéléré vers l'électricité"},
+    {k:"Programme économies",v:"12,5 Mds$ sur 2026-2030",e:"Discipline des coûts"},
+    {k:"Ambition renouvelables",v:"35+ GW en 2030",e:"Financée par les cash-flows hydrocarbures"},
+    {k:"Politique actionnaires",v:"Dividende progressif + rachats",e:"Breakeven ~40$/bbl"},
+    {k:"Cible CAPEX",v:"13-17 Mds$/an",e:"Équilibre croissance / discipline"},
+    {k:"FID",v:"Final Investment Decision",e:"Décision finale d'investissement pour un grand projet"},
+    {k:"Breakeven",v:"~40$/baril",e:"Seuil pour couvrir dividende + CAPEX"},
+  ],
+  branches:[
+    {k:"CPO",v:"Charge Point Operator",e:"Installe et opère les bornes de recharge. TotalEnergies est CPO via sa branche EV."},
+    {k:"MSP",v:"Mobility Service Provider",e:"Fournit l'accès aux réseaux de recharge aux conducteurs (app, carte)"},
+    {k:"OCPP",v:"Open Charge Point Protocol",e:"Communication entre borne et CSMS (backend de gestion)"},
+    {k:"OCPI",v:"Open Charge Point Interface",e:"Protocole de roaming entre réseaux CPO/MSP"},
+    {k:"ISO 15118",v:"Plug & Charge",e:"Authentification automatique du VE via certificats PKI — standard industriel"},
+    {k:"Autocharge",v:"Authentification via MAC address",e:"Plus simple qu'ISO 15118 mais moins sécurisé"},
+    {k:"V2G",v:"Vehicle-to-Grid",e:"Le VE restitue de l'énergie au réseau — flexibilité énergétique"},
+    {k:"SAF",v:"Sustainable Aviation Fuel",e:"Carburant durable pour l'aviation — matières résiduelles/renouvelables"},
+    {k:"CSMS",v:"Charging Station Management System",e:"Backend de supervision et gestion des bornes"},
+    {k:"Smart Charging",v:"Recharge intelligente",e:"Optimisation des flux de charge selon signaux réseau, prix, disponibilité"},
+  ],
+  projet:[
+    {k:"Scrum",v:"Framework agile itératif",e:"Sprints + Product Owner + Scrum Master + équipe"},
+    {k:"Sprint",v:"Itération de 1 à 4 semaines",e:"Unité de base Scrum avec livrable potentiellement shippable"},
+    {k:"Product Owner",v:"Responsable vision produit + backlog",e:"Interface métier / équipe — priorise la valeur"},
+    {k:"Backlog",v:"Liste priorisée des tâches/features",e:"Géré par le PO, évolue continuellement"},
+    {k:"Vélocité",v:"Story points livrés par sprint",e:"Capacité de l'équipe — sert à planifier"},
+    {k:"RACI",v:"Responsible / Accountable / Consulted / Informed",e:"Matrice de clarification des rôles sur chaque tâche"},
+    {k:"Chemin critique",v:"Séquence de tâches la plus longue",e:"Tout retard sur ce chemin retarde le projet entier"},
+    {k:"KPI",v:"Key Performance Indicator",e:"Indicateur mesurable d'un objectif — délai, coût, qualité"},
+    {k:"Risk register",v:"Registre des risques",e:"Probabilité × Impact, mitigation, responsable"},
+    {k:"Rétrospective",v:"Cérémonie fin de sprint",e:"L'équipe identifie ce qui a bien/mal fonctionné et planifie des améliorations"},
+  ],
+  hardcore:[
+    {k:"EVA",v:"NOPAT - (WACC × Capitaux Employés)",e:"Vraie création de valeur économique — positif si ROACE > WACC"},
+    {k:"FCF 2025",v:"~10,7 Mds$",e:"CFFO 27,8 - CAPEX 17,1 = 10,7 Mds$ disponibles pour dividendes + rachats"},
+    {k:"CAGR renouvelables",v:"~12%/an",e:"Pour passer de ~20 GW (2025) à 35+ GW (2030) en 5 ans"},
+    {k:"Ratio RN ajusté / CFFO",v:"~56%",e:"15,6 / 27,8 — mesure l'efficacité de conversion du cash en résultat"},
+    {k:"RNOAI 2025",v:"~15,1 Mds$",e:"ROACE 12,6% × Capitaux employés ~120 Mds$"},
+    {k:"OCPP 1.6 vs 2.0.1",v:"2.0.1 ajoute ISO 15118, sécurité TLS, device management",e:"Migration critique pour les CPOs — Plug & Charge natif"},
+    {k:"Dette hybride",v:"50% dettes / 50% fonds propres (agences notation)",e:"Améliore le gearing sans diluer — outil bilan TotalEnergies"},
+    {k:"WSJF",v:"(Business Value + Urgence + Risk Reduction) / Taille",e:"Priorisation SAFe — maximise le débit de valeur par unité d'effort"},
+    {k:"Roaming EV",v:"Frais d'interchange CPO→MSP",e:"Modèle B2B + B2C — TotalEnergies EV est les deux"},
+    {k:"Risques critiques déploiement bornes",v:"Raccordement réseau / Conformité OCPP / Adoption",e:"Délais ENEDIS, homologation AFIR, utilisation réelle vs prévisionnelle"},
+  ],
+};
+
+let mode='quiz',curLevel=1,qs=[],cur=0,score=0,catSc={},sessionStart=0;
+let timerInt,tLeft;
+let fcIdx=0,fcQ=[],fcKnown=0;
+let activeMemo='chiffres';
+
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function setMode(m){mode=m;document.getElementById('m-quiz').className='mode-btn'+(m==='quiz'?' on':'');document.getElementById('m-flash').className='mode-btn'+(m==='flash'?' on':'');}
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2500);}
+function toggleDark(){const h=document.documentElement;const d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('dark-btn').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
+
+function getP(){return JSON.parse(localStorage.getItem('tep2')||'{"xp":0,"unlocked":[1],"bestScores":{},"sessions":0,"totalCorrect":0,"totalQ":0,"catCorrect":{},"catTotal":{},"history":[],"streak":0,"lastPlayed":null}')}
+function saveP(p){localStorage.setItem('tep2',JSON.stringify(p))}
+function isUnlocked(lv){return true;} // All levels open
+function unlockLv(lv){return false;}
+function getBest(lv){return getP().bestScores[lv]||0}
+function saveBest(lv,s){const p=getP();if(!p.bestScores[lv]||s>p.bestScores[lv]){p.bestScores[lv]=s;saveP(p);}}
+function addXP(n){const p=getP();p.xp=(p.xp||0)+n;saveP(p);}
+function updateStreak(){const p=getP();const today=new Date().toDateString();if(p.lastPlayed===today)return;const yesterday=new Date(Date.now()-864e5).toDateString();p.streak=p.lastPlayed===yesterday?(p.streak||0)+1:1;p.lastPlayed=today;saveP(p);}
+function recordSession(sc,tot,cats){const p=getP();p.sessions=(p.sessions||0)+1;p.totalCorrect=(p.totalCorrect||0)+sc;p.totalQ=(p.totalQ||0)+tot;Object.entries(cats).forEach(([c,[ok,t]])=>{p.catCorrect=p.catCorrect||{};p.catTotal=p.catTotal||{};p.catCorrect[c]=(p.catCorrect[c]||0)+ok;p.catTotal[c]=(p.catTotal[c]||0)+t;});const d=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});const elapsed=sessionStart?Date.now()-sessionStart:0;p.history=p.history||[];p.history.push({d,s:sc,t:tot,lv:curLevel,tm:elapsed});if(p.history.length>30)p.history=p.history.slice(-30);saveP(p);}
+
+function renderHome(){
+  document.getElementById('levels-grid').innerHTML=LEVELS.map(lv=>{
+    const unlocked=isUnlocked(lv.id);const best=getBest(lv.id);const pct=Math.round(best/15*100);const locked=!unlocked;
+    return`<div class="level-card ${lv.lv}${locked?' locked':''}" onclick="selectLevel(${lv.id})">
+      <div class="licon">${lv.icon}</div>
+      <div class="linfo">
+        <div class="lname">${lv.name}</div>
+        <div class="ldesc">${lv.desc}</div>
+        <span class="lmeta" style="background:${lv.color}18;color:${lv.tc}">${lv.timer+'s / question · 15 questions'}</span>
+        ${(!locked&&best>0)?`<div class="lprog"><div class="lbar" style="width:${pct}%;background:${lv.tc}"></div></div>`:''}
+      </div>
+      <div class="lright">${locked?'🔒':`<div class="lscore" style="color:${lv.tc}">${best>0?best+'/15':''}</div><div class="lpct">${best>0?pct+'%':''}</div>`}</div>
+    </div>`;
+  }).join('');
+  const p=getP();const xp=p.xp||0;const maxXp=600;const pp=Math.min(100,Math.round(xp/maxXp*100));
+  document.getElementById('xp-val').textContent=xp+' XP';
+  document.getElementById('xp-fill').style.width=pp+'%';
+  const lvName=xp<100?'Débutant':xp<250?'Intermédiaire':xp<450?'Avancé':'Expert';
+  document.getElementById('xp-lname').textContent=lvName+' · '+xp+'/'+maxXp+' XP';
+  const streak=p.streak||0;
+  document.getElementById('streak-text').textContent=streak+' jour'+(streak>1?'s':'')+' consécutif'+(streak>1?'s':'');
+  if(p.lastPlayed)document.getElementById('last-played').textContent='Dernière : '+new Date(p.lastPlayed).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+  renderStats();renderMemoContent();
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.htab').forEach(b=>{const t=b.getAttribute('onclick').match(/'(\w+)'/)?.[1];b.className='htab'+(t===tab?' on':'');});
+  document.getElementById('tab-stats').style.display=tab==='stats'?'flex':'none';
+  document.getElementById('tab-memo').style.display=tab==='memo'?'block':'none';
+  document.getElementById('tab-leaderboard').style.display=tab==='leaderboard'?'block':'none';
+  if(tab==='leaderboard')renderLeaderboard();
+}
+
+function renderStats(){
+  const p=getP();const h=p.history||[];const last7=h.slice(-7);
+  const chartEl=document.getElementById('chart');
+  if(!last7.length){chartEl.innerHTML='<div style="font-size:12px;color:var(--muted);margin:auto">Aucune session encore</div>';}
+  else{chartEl.innerHTML=last7.map(e=>{const pct=Math.round(e.s/e.t*100);const lv=LEVELS[e.lv-1];const h=Math.round(pct*0.9);return`<div class="chart-bar-wrap"><div class="chart-bar" style="height:${h}px;background:${lv.tc};opacity:0.85"></div><div class="chart-label">${e.d}</div></div>`;}).join('');}
+  const catColors={chiffres:'var(--blue)',finance:'var(--green)',strategie:'var(--orange)',branches:'var(--purple)',projet:'var(--teal)'};
+  const wp=document.getElementById('weakpoints');
+  const entries=Object.entries(CAT_LABELS).map(([c,lbl])=>{const ok=p.catCorrect?.[c]||0;const tot=p.catTotal?.[c]||0;const pct=tot>0?Math.round(ok/tot*100):null;return{c,lbl,ok,tot,pct};}).filter(e=>e.tot>0).sort((a,b)=>(a.pct??100)-(b.pct??100));
+  if(!entries.length){wp.innerHTML='<div style="font-size:12px;color:var(--muted)">Joue quelques sessions pour voir tes points faibles.</div>';}
+  else{wp.innerHTML=entries.map(e=>`<div class="wp-row"><div class="wp-label">${CAT_ICONS[e.c]} ${e.lbl.split(' ')[0]}</div><div class="wp-bar"><div class="wp-fill" style="width:${e.pct}%;background:${catColors[e.c]}"></div></div><div class="wp-pct" style="color:${e.pct>=80?'var(--green)':e.pct>=50?'var(--orange)':'var(--red)'}">${e.pct}%</div></div>`).join('');}
+  document.getElementById('st-sessions').textContent=p.sessions||0;
+  const gRate=p.totalQ>0?Math.round(p.totalCorrect/p.totalQ*100):0;
+  document.getElementById('st-correct').textContent=gRate+'%';
+  document.getElementById('st-xp').textContent=p.xp||0;
+  const bestLv=Math.max(...(p.unlocked||[1]));
+  document.getElementById('st-best').textContent=LEVELS[bestLv-1].icon;
+}
+
+function switchMemo(cat){
+  activeMemo=cat;
+  document.querySelectorAll('.mtab').forEach(b=>b.className='mtab');
+  const idx={chiffres:0,finance:1,strategie:2,branches:3,projet:4,hardcore:5}[cat];
+  document.querySelectorAll('.mtab')[idx].className='mtab on';
+  renderMemoContent();
+}
+function renderMemoContent(){
+  const items=MEMO[activeMemo];const c=CAT_TC[activeMemo];
+  document.getElementById('memo-content').innerHTML=`<div class="memo-card">
+    <div class="memo-title">${CAT_ICONS[activeMemo]} ${CAT_LABELS[activeMemo]}</div>
+    ${items.map(m=>`<div class="memo-item"><div><div class="memo-key">${m.k}</div><div class="memo-exp">${m.e}</div></div><div class="memo-val" style="color:${c}">${m.v}</div></div>`).join('')}
+  </div>`;}
+
+function selectLevel(id){if(mode==='flash'){startFlash(id);return;}startQuiz(id);}
+
+function startQuiz(lv){
+  curLevel=lv;const lvConf=LEVELS[lv-1];
+  qs=shuffle(Q[lv]);cur=0;score=0;sessionStart=Date.now();
+  catSc={chiffres:[0,0],finance:[0,0],strategie:[0,0],branches:[0,0],projet:[0,0],hardcore:[0,0]};
+  const b=document.getElementById('qlvbadge');b.textContent=lvConf.icon+' '+lvConf.name;
+  b.style.cssText=`background:${lvConf.color}18;color:${lvConf.tc};font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;`;
+  showScreen('screen-quiz');renderQ();
+}
+
+function startTimer(){
+  clearInterval(timerInt);const t=LEVELS[curLevel-1].timer;tLeft=t;
+  const el=document.getElementById('qtimer');el.textContent=tLeft+'s';el.className='qtimer';
+  timerInt=setInterval(()=>{tLeft--;el.textContent=tLeft+'s';if(tLeft<=Math.min(8,Math.floor(t*0.3)))el.className='qtimer hot';if(tLeft<=0){clearInterval(timerInt);timeUp();}},1000);
+}
+
+function timeUp(){
+  document.querySelectorAll('.ans').forEach(b=>b.disabled=true);const q=qs[cur];
+  q._s.forEach((a,i)=>{if(a.o===q.c)document.querySelectorAll('.ans')[i].classList.add('reveal');});
+  showFb(false,'Temps écoulé ! '+q.e);const nb=document.getElementById('btn-next');
+  nb.className='btn-next show';nb.textContent=cur+1<qs.length?'Question suivante →':'Voir mes résultats →';
+}
+
+function renderQ(){
+  const q=qs[cur];document.getElementById('qcard').style.animation='none';document.getElementById('qcard').offsetHeight;document.getElementById('qcard').style.animation='';
+  document.getElementById('pb').style.width=(cur/qs.length*100)+'%';document.getElementById('pb').style.background=LEVELS[curLevel-1].tc;
+  document.getElementById('qnum').textContent=`${cur+1}/${qs.length}`;
+  const badge=document.getElementById('qbadge');badge.textContent=CAT_ICONS[q.cat]+' '+CAT_LABELS[q.cat];badge.className='qbadge '+CAT_COLORS[q.cat];
+  document.getElementById('qtext').textContent=q.q;document.getElementById('qhint').textContent=q.hint;
+  const sh=q.a.map((a,i)=>({t:a,o:i}));shuffle(sh);q._s=sh;
+  document.getElementById('answers').innerHTML=sh.map((a,i)=>`<button class="ans" onclick="answer(${i})"><span class="ansl">${String.fromCharCode(65+i)}</span>${a.t}</button>`).join('');
+  document.getElementById('fb').className='fb';document.getElementById('btn-next').className='btn-next';
+  startTimer();
+}
+
+function answer(idx){
+  clearInterval(timerInt);const q=qs[cur];const btns=document.querySelectorAll('.ans');btns.forEach(b=>b.disabled=true);
+  const ok=q._s[idx].o===q.c;catSc[q.cat][1]++;
+  if(ok){btns[idx].classList.add('correct');score++;catSc[q.cat][0]++;}
+  else{btns[idx].classList.add('wrong');q._s.forEach((a,i)=>{if(a.o===q.c)btns[i].classList.add('reveal');});}
+  showFb(ok,(ok?'✓ ':'✗ ')+q.e);const nb=document.getElementById('btn-next');
+  nb.className='btn-next show';nb.textContent=cur+1<qs.length?'Question suivante →':'Voir mes résultats →';
+}
+
+function showFb(ok,txt){const el=document.getElementById('fb');el.className='fb show '+(ok?'ok':'ko');el.textContent=txt;}
+function nextQ(){cur++;if(cur>=qs.length)showResult();else renderQ();}
+
+function showResult(){
+  clearInterval(timerInt);const pct=Math.round(score/qs.length*100);const lvConf=LEVELS[curLevel-1];
+  saveBest(curLevel,score);const xpGained=score*5+(pct>=70?20:0)+(pct>=90?30:0);addXP(xpGained);
+  recordSession(score,qs.length,catSc);updateStreak();
+  const dur=sessionStart?Math.round((Date.now()-sessionStart)/1000):0;
+  saveScoreRemote(curLevel,score,qs.length,pct,dur);
+  let em,ti,su;
+  if(pct>=90){em='🏆';ti='Parfait !';su="Score exceptionnel. Tu maîtrises ce niveau.";}
+  else if(pct>=70){em='💪';ti='Bon niveau';su="Bonne maîtrise. Rejoue pour viser 90%+.";}
+  else if(pct>=50){em='📚';ti='À consolider';su="Des lacunes. Revois la fiche mémo et rejoue.";}
+  else{em='🔁';ti='À retravailler';su="Recommence après avoir relu la fiche mémo.";}
+  document.getElementById('remoji').textContent=em;document.getElementById('rtitle').textContent=ti;
+  document.getElementById('rscore').style.color=lvConf.tc;document.getElementById('rscore').textContent=score+'/'+qs.length+' ('+pct+'%)';
+  document.getElementById('rsub').textContent=su+' +'+xpGained+' XP';
+  const elapsed=Math.round((Date.now()-sessionStart)/1000);
+  const mins=Math.floor(elapsed/60);const secs=elapsed%60;
+  const timeStr=mins>0?mins+'min '+secs+'s':secs+'s';
+  const timeEl=document.getElementById('rtime');if(timeEl)timeEl.textContent='⏱ '+timeStr;
+  const ub=document.getElementById('unlock-banner');ub.style.display='none';
+  document.getElementById('bd').innerHTML=Object.entries(catSc).filter(([,v])=>v[1]>0).map(([c,[ok,tot]])=>{const p=tot>0?Math.round(ok/tot*100):0;const cl=p>=80?'vg':p>=50?'vm':'vb';return`<div class="bdrow"><span class="bdlabel">${CAT_ICONS[c]} ${CAT_LABELS[c]}</span><span class="bdval ${cl}">${ok}/${tot} (${p}%)</span></div>`;}).join('');
+  showScreen('screen-result');
+}
+
+function launchConfetti(){const colors=['#E8002D','#F5800A','#F5C400','#00A550','#0064A8'];const wrap=document.getElementById('confetti');wrap.innerHTML='';for(let i=0;i<60;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.cssText=`left:${Math.random()*100}%;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-delay:${Math.random()*0.8}s;animation-duration:${2.5+Math.random()*1.5}s;border-radius:${Math.random()>0.5?'50%':'2px'}`;wrap.appendChild(el);}setTimeout(()=>wrap.innerHTML='',5000);}
+
+function retryLevel(){startQuiz(curLevel);}
+function goHome(){renderHome();showScreen('screen-home');}
+
+function startFlash(lv){curLevel=lv||1;fcQ=shuffle(Q[curLevel]);fcIdx=0;fcKnown=0;showScreen('screen-flash');renderFlash();}
+function renderFlash(){const q=fcQ[fcIdx];document.getElementById('fcfront').style.display='flex';document.getElementById('fcback').style.display='none';const b=document.getElementById('fcbadge');b.textContent=CAT_ICONS[q.cat]+' '+CAT_LABELS[q.cat];b.className='qbadge '+CAT_COLORS[q.cat];document.getElementById('fcq').textContent=q.q;document.getElementById('fca').textContent=q.a[q.c];document.getElementById('fccount').textContent=`Carte ${fcIdx+1}/${fcQ.length} · ${fcKnown} connues · ${LEVELS[curLevel-1].name}`;}
+function flipCard(){const fr=document.getElementById('fcfront'),bk=document.getElementById('fcback');const f=bk.style.display==='flex';fr.style.display=f?'flex':'none';bk.style.display=f?'none':'flex';}
+function fcNext(k){if(k)fcKnown++;fcIdx++;if(fcIdx>=fcQ.length){toast(`Fini ! ${fcKnown}/${fcQ.length} connues.`);setTimeout(()=>{fcIdx=0;fcKnown=0;fcQ=shuffle(Q[curLevel]);renderFlash();},1500);return;}renderFlash();}
+
+function shareScore(){
+  const pct=Math.round(score/qs.length*100);
+  const lvConf=LEVELS[curLevel-1];
+  const name=localStorage.getItem('playerName')||'';
+  const playerName=name||prompt('Ton prénom (pour le lien partagé) :','');
+  if(playerName)localStorage.setItem('playerName',playerName);
+  const base=window.location.href.split('?')[0];
+  const link=`${base}?s=${score}&t=${qs.length}&lv=${curLevel}&pct=${pct}&name=${encodeURIComponent(playerName||'Joueur')}`;
+  document.getElementById('shared-score-display').textContent=score+'/'+qs.length+' ('+pct+'%)';
+  document.getElementById('shared-score-level').textContent=lvConf.icon+' Niveau '+lvConf.name+' · '+(playerName||'Joueur');
+  document.getElementById('shared-score-link').textContent=link;
+  document.getElementById('shared-score-link').dataset.link=link;
+  document.getElementById('shared-score-card').style.display='block';
+  document.getElementById('shared-score-card').scrollIntoView({behavior:'smooth'});
+}
+
+function copyLink(){
+  const link=document.getElementById('shared-score-link').dataset.link;
+  if(navigator.clipboard){navigator.clipboard.writeText(link).then(()=>toast('Lien copié !'));}
+  else{const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Lien copié !');}
+}
+
+function checkSharedScore(){
+  const params=new URLSearchParams(window.location.search);
+  if(!params.get('s'))return;
+  const s=parseInt(params.get('s')),t=parseInt(params.get('t')),lv=parseInt(params.get('lv'));
+  const pct=parseInt(params.get('pct'));const name=decodeURIComponent(params.get('name')||'Joueur');
+  const lvConf=LEVELS[lv-1]||LEVELS[0];
+  // Show a dedicated shared score view
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px;font-family:Inter,sans-serif';
+  el.innerHTML=`
+    <div style="display:flex;height:5px;border-radius:100px;overflow:hidden;gap:3px;width:200px">
+      <div style="flex:1;background:#E8002D;border-radius:100px"></div>
+      <div style="flex:1;background:#F5800A;border-radius:100px"></div>
+      <div style="flex:1;background:#F5C400;border-radius:100px"></div>
+      <div style="flex:1;background:#00A550;border-radius:100px"></div>
+      <div style="flex:1;background:#0064A8;border-radius:100px"></div>
+    </div>
+    <div style="font-size:18px;font-weight:800;color:var(--text)">Quiz TotalEnergies</div>
+    <div style="font-size:48px">${pct>=90?'🏆':pct>=70?'💪':pct>=50?'📚':'🔁'}</div>
+    <div style="font-size:28px;font-weight:900;color:${lvConf.tc}">${s}/${t} (${pct}%)</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text)">${name}</div>
+    <div style="font-size:13px;color:var(--muted)">${lvConf.icon} Niveau ${lvConf.name}</div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;max-width:280px;line-height:1.5">Tu peux battre ce score ?</div>
+    <button onclick="window.location.href=window.location.href.split('?')[0]" style="background:#F5800A;color:white;border:none;border-radius:13px;padding:14px 32px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Jouer maintenant →</button>
+  `;
+  document.body.appendChild(el);
+}
+
+const savedTheme=localStorage.getItem('theme')||'light';
+document.documentElement.setAttribute('data-theme',savedTheme);
+document.getElementById('dark-btn').textContent=savedTheme==='dark'?'☀️':'🌙';
+document.getElementById('tab-stats').style.display='flex';
+document.getElementById('tab-stats').style.flexDirection='column';
+document.getElementById('tab-stats').style.gap='14px';
+checkSharedScore();
+// Login gate
+if(!getPlayer()){showScreen('screen-login');}else{initHome();renderHome();}
+
+
+</script>
+</body>
+</html>
