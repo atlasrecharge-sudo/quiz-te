@@ -150,8 +150,8 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
     <div><div class="tn">Quiz TotalEnergies</div><div class="ts">Préparation Entretien RH</div></div>
   </div>
   <div class="tr">
-    <button class="mode-btn on" id="m-quiz" onclick="setMode('quiz')">QCM</button>
-    <button class="mode-btn" id="m-flash" onclick="setMode('flash')">Flash</button>
+    <button class="mode-btn on" id="m-quiz" onclick="setMode('quiz')">🎯 Quiz</button>
+    <button class="mode-btn" id="m-flash" onclick="setMode('flash')">📋 Révision</button>
     <button class="dark-btn" onclick="toggleDark()" id="dark-btn">🌙</button>
   </div>
 </header>
@@ -187,6 +187,7 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
         <div style="font-size:11px;color:var(--muted)" id="last-played"></div>
       </div>
     </div>
+    <div id="mode-banner" style="font-size:12px;color:var(--muted);padding:6px 4px;text-align:center;display:none"></div>
     <div id="home-player-bar" style="display:none;align-items:center;justify-content:space-between;padding:8px 4px">
       <span style="font-size:13px;font-weight:700;color:var(--text)" id="home-player-name"></span>
       <button onclick="logout()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer">Changer →</button>
@@ -638,7 +639,15 @@ window.addEventListener('popstate',function(e){
     renderHome();showScreen('screen-home');
   }
 });
-function setMode(m){mode=m;document.getElementById('m-quiz').className='mode-btn'+(m==='quiz'?' on':'');document.getElementById('m-flash').className='mode-btn'+(m==='flash'?' on':'');}
+function setMode(m){
+  mode=m;
+  document.getElementById('m-quiz').className='mode-btn'+(m==='quiz'?' on':'');
+  document.getElementById('m-flash').className='mode-btn'+(m==='flash'?' on':'');
+  const banner=document.getElementById('mode-banner');
+  if(m==='flash'){banner.textContent='📋 Mode Révision — parcours les flashcards, sans chrono ni score';banner.style.display='block';}
+  else{banner.textContent='🎯 Mode Quiz — 4 choix, chronomètre, score à la fin';banner.style.display='block';}
+  renderHome();
+}
 function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2500);}
 function toggleDark(){const h=document.documentElement;const d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('dark-btn').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
 
@@ -656,11 +665,11 @@ function renderHome(){
   document.getElementById('levels-grid').innerHTML=LEVELS.map(lv=>{
     const unlocked=isUnlocked(lv.id);const best=getBest(lv.id);const pct=Math.round(best/15*100);const locked=!unlocked;
     return`<div class="level-card ${lv.lv}${locked?' locked':''}" onclick="selectLevel(${lv.id})">
-      <div class="licon">${lv.icon}</div>
+      <div class="licon">${mode==='flash'?'📋':lv.icon}</div>
       <div class="linfo">
         <div class="lname">${lv.name}</div>
         <div class="ldesc">${lv.desc}</div>
-        <span class="lmeta" style="background:${lv.color}18;color:${lv.tc}">${lv.timer+'s / question · 15 questions'}</span>
+        <span class="lmeta" style="background:${lv.color}18;color:${lv.tc}">${mode==='flash'?'📋 Toutes les questions · Révision libre':lv.timer+'s / question · 15 questions'}</span>
         ${(!locked&&best>0)?`<div class="lprog"><div class="lbar" style="width:${pct}%;background:${lv.tc}"></div></div>`:''}
       </div>
       <div class="lright">${locked?'🔒':`<div class="lscore" style="color:${lv.tc}">${best>0?best+'/15':''}</div><div class="lpct">${best>0?pct+'%':''}</div>`}</div>
