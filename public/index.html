@@ -621,7 +621,23 @@ let fcIdx=0,fcQ=[],fcKnown=0;
 let activeMemo='chiffres';
 
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  // Push state for back-button handling
+  if(id!=='screen-home'&&id!=='screen-login'){
+    history.pushState({screen:id},'',window.location.pathname+window.location.search);
+  }
+}
+window.addEventListener('popstate',function(e){
+  // Back button pressed — return to home instead of closing
+  const active=document.querySelector('.screen.active');
+  if(active&&active.id!=='screen-home'&&active.id!=='screen-login'){
+    clearInterval(timerInt);
+    renderHome();showScreen('screen-home');
+  }
+});
 function setMode(m){mode=m;document.getElementById('m-quiz').className='mode-btn'+(m==='quiz'?' on':'');document.getElementById('m-flash').className='mode-btn'+(m==='flash'?' on':'');}
 function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2500);}
 function toggleDark(){const h=document.documentElement;const d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('dark-btn').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
