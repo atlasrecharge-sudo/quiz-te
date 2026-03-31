@@ -138,11 +138,72 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
 @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 20px;border-radius:11px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:999;white-space:nowrap}
 .toast.show{opacity:1}
+/* Report button */
+.btn-report{background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:8px;margin-top:8px;opacity:0.6;transition:opacity 0.15s;font-family:inherit}
+.btn-report:hover{opacity:1;background:rgba(232,0,45,0.06);color:var(--red)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--card);border-radius:20px;padding:24px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,0.2)}
+.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px}
+.modal-radio-group{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.modal-radio-label{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);transition:border-color 0.15s}
+.modal-radio-label:has(input:checked){border-color:var(--orange);background:rgba(245,128,10,0.06)}
+.modal-radio-label input{accent-color:var(--orange)}
+.modal-textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;font-family:inherit;background:var(--bg);color:var(--text);resize:vertical;min-height:60px;margin-bottom:14px;outline:none}
+.modal-textarea:focus{border-color:var(--orange)}
+.modal-actions{display:flex;gap:10px}
+.modal-btn-send{flex:1;background:var(--orange);color:white;border:none;border-radius:11px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.modal-btn-cancel{flex:1;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:11px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+/* Errors section */
+.errors-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.errors-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:12px}
+.error-card{background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid var(--red)}
+.error-card:last-child{margin-bottom:0}
+.error-q{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.error-ans{font-size:12px;font-weight:600;color:var(--green);margin-bottom:3px}
+.error-exp{font-size:11px;color:var(--muted);line-height:1.5}
+/* Duel screen */
+.duel-challenge-card{background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(232,0,45,0.06));border:2px solid rgba(124,58,237,0.3);border-radius:18px;padding:24px;text-align:center}
+/* Profile tab */
+.profile-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.profile-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.profile-table td{font-size:13px;padding:8px;border-bottom:1px solid var(--border)}
+.profile-table tr:last-child td{border-bottom:none}
+.btn-reset{width:100%;background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:11px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:12px}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 <div class="confetti-wrap" id="confetti"></div>
+
+<!-- Report Modal -->
+<div class="modal-overlay" id="report-modal" style="display:none" onclick="if(event.target===this)closeReportModal()">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ Signaler un problème</div>
+    <div id="report-q-preview" style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:8px 10px;background:var(--bg);border-radius:8px;line-height:1.4"></div>
+    <div class="modal-radio-group">
+      <label class="modal-radio-label"><input type="radio" name="report-type" value="wrong_answer" checked> ❌ Réponse incorrecte</label>
+      <label class="modal-radio-label"><input type="radio" name="report-type" value="ambiguous"> ❓ Question ambiguë</label>
+      <label class="modal-radio-label"><input type="radio" name="report-type" value="text_error"> ✏️ Erreur dans le texte</label>
+    </div>
+    <textarea class="modal-textarea" id="report-comment" placeholder="Précisions (optionnel)…"></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn-send" onclick="submitReport()">Envoyer</button>
+      <button class="modal-btn-cancel" onclick="closeReportModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Duel Challenge Screen -->
+<div class="screen" id="screen-duel">
+  <div class="card duel-challenge-card" id="duel-challenge-inner">
+    <div style="font-size:40px;margin-bottom:8px">⚔️</div>
+    <div id="duel-challenger-info" style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px"></div>
+    <div id="duel-score-info" style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6"></div>
+    <button onclick="acceptDuel()" style="width:100%;background:var(--purple);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">⚔️ Accepter le défi</button>
+    <button onclick="goHome()" style="width:100%;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px">Non merci</button>
+  </div>
+</div>
 
 <header class="topbar">
   <div class="tl">
@@ -196,6 +257,7 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
       <button class="htab on" onclick="switchTab('stats')">📊 Stats</button>
       <button class="htab" onclick="switchTab('memo')">📋 Mémo</button>
       <button class="htab" onclick="switchTab('leaderboard')">🏅 Classement</button>
+      <button class="htab" onclick="switchTab('profil')">👤 Profil</button>
     </div>
     <div id="tab-stats" style="display:flex;flex-direction:column;gap:14px">
       <div class="card">
@@ -217,6 +279,7 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
         <div id="lb-content"><div style="font-size:12px;color:var(--muted)">Chargement...</div></div>
       </div>
     </div>
+    <div id="tab-profil" style="display:none"></div>
     <div id="tab-memo" style="display:none">
       <div class="memo-tabs">
         <button class="mtab on" onclick="switchMemo('chiffres')">📊 Chiffres</button>
@@ -248,6 +311,7 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
       <div class="qhint" id="qhint"></div>
       <div class="answers" id="answers"></div>
       <div class="fb" id="fb"></div>
+      <button class="btn-report" onclick="openReportModal()">⚠️ Signaler un problème</button>
     </div>
     <button class="btn-next" id="btn-next" onclick="nextQ()">Question suivante →</button>
   </div>
@@ -288,7 +352,13 @@ body{min-height:100vh;display:flex;justify-content:center;background:var(--bg)}
       <div class="uldesc" id="uldesc"></div>
     </div>
     <div class="bd-card" id="bd"></div>
+    <div id="errors-section" class="errors-section" style="display:none">
+      <div class="errors-title">❌ Questions ratées</div>
+      <div id="errors-list"></div>
+    </div>
     <button class="btn-retry" onclick="retryLevel()">Rejouer ce niveau</button>
+    <button id="btn-retry-errors" style="width:100%;background:var(--card);color:var(--red);border:1.5px solid var(--red);border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px" onclick="retryErrors()">🔁 Rejouer mes erreurs</button>
+    <button id="btn-duel" style="width:100%;background:var(--purple);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px" onclick="createDuel()">⚔️ Défier un collègue</button>
     <button id="btn-share-score" style="width:100%;background:var(--blue);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px" onclick="shareScore()">🔗 Partager mon score</button>
     <button class="btn-back" onclick="goHome()">Retour aux niveaux</button>
 
@@ -620,6 +690,8 @@ let mode='quiz',curLevel=1,qs=[],cur=0,score=0,catSc={},sessionStart=0;
 let timerInt,tLeft;
 let fcIdx=0,fcQ=[],fcKnown=0;
 let activeMemo='chiffres';
+let wrongQs=[];
+let activeDuel=null; // {id, challenger_pseudo, challenger_score, total, level, seed}
 
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 function showScreen(id){
@@ -691,6 +763,8 @@ function switchTab(tab){
   document.getElementById('tab-stats').style.display=tab==='stats'?'flex':'none';
   document.getElementById('tab-memo').style.display=tab==='memo'?'block':'none';
   document.getElementById('tab-leaderboard').style.display=tab==='leaderboard'?'block':'none';
+  document.getElementById('tab-profil').style.display=tab==='profil'?'flex':'none';
+  if(tab==='profil'){document.getElementById('tab-profil').style.flexDirection='column';document.getElementById('tab-profil').style.gap='14px';renderProfileTab();}
   if(tab==='leaderboard')renderLeaderboard();
 }
 
@@ -729,8 +803,12 @@ function renderMemoContent(){
 function selectLevel(id){if(mode==='flash'){startFlash(id);return;}startQuiz(id);}
 
 function startQuiz(lv){
-  curLevel=lv;const lvConf=LEVELS[lv-1];
-  qs=shuffle(Q[lv]).slice(0,15);cur=0;score=0;sessionStart=Date.now();
+  startQuizWithQuestions(Q[lv].slice(),lv);
+}
+
+function startQuizWithQuestions(pool,lv){
+  curLevel=lv||curLevel;const lvConf=LEVELS[curLevel-1];
+  qs=shuffle(pool).slice(0,Math.min(15,pool.length));cur=0;score=0;sessionStart=Date.now();wrongQs=[];
   catSc={chiffres:[0,0],finance:[0,0],strategie:[0,0],branches:[0,0],projet:[0,0],hardcore:[0,0]};
   const b=document.getElementById('qlvbadge');b.textContent=lvConf.icon+' '+lvConf.name;
   b.style.cssText=`background:${lvConf.color}18;color:${lvConf.tc};font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;`;
@@ -746,6 +824,7 @@ function startTimer(){
 function timeUp(){
   document.querySelectorAll('.ans').forEach(b=>b.disabled=true);const q=qs[cur];
   q._s.forEach((a,i)=>{if(a.o===q.c)document.querySelectorAll('.ans')[i].classList.add('reveal');});
+  wrongQs.push(q);
   showFb(false,'Temps écoulé ! '+q.e);const nb=document.getElementById('btn-next');
   nb.className='btn-next show';nb.textContent=cur+1<qs.length?'Question suivante →':'Voir mes résultats →';
 }
@@ -766,7 +845,7 @@ function answer(idx){
   clearInterval(timerInt);const q=qs[cur];const btns=document.querySelectorAll('.ans');btns.forEach(b=>b.disabled=true);
   const ok=q._s[idx].o===q.c;catSc[q.cat][1]++;
   if(ok){btns[idx].classList.add('correct');score++;catSc[q.cat][0]++;}
-  else{btns[idx].classList.add('wrong');q._s.forEach((a,i)=>{if(a.o===q.c)btns[i].classList.add('reveal');});}
+  else{btns[idx].classList.add('wrong');q._s.forEach((a,i)=>{if(a.o===q.c)btns[i].classList.add('reveal');});wrongQs.push(q);}
   showFb(ok,(ok?'✓ ':'✗ ')+q.e);const nb=document.getElementById('btn-next');
   nb.className='btn-next show';nb.textContent=cur+1<qs.length?'Question suivante →':'Voir mes résultats →';
 }
@@ -798,13 +877,181 @@ function showResult(){
   const timeEl=document.getElementById('rtime');if(timeEl)timeEl.textContent='⏱ '+timeStr+' / '+theorStr+' théorique';
   const ub=document.getElementById('unlock-banner');ub.style.display='none';
   document.getElementById('bd').innerHTML=Object.entries(catSc).filter(([,v])=>v[1]>0).map(([c,[ok,tot]])=>{const p=tot>0?Math.round(ok/tot*100):0;const cl=p>=80?'vg':p>=50?'vm':'vb';return`<div class="bdrow"><span class="bdlabel">${CAT_ICONS[c]} ${CAT_LABELS[c]}</span><span class="bdval ${cl}">${ok}/${tot} (${p}%)</span></div>`;}).join('');
+
+  // Errors section
+  const errSec=document.getElementById('errors-section');
+  const errList=document.getElementById('errors-list');
+  const btnRetryErr=document.getElementById('btn-retry-errors');
+  if(wrongQs.length>0){
+    errSec.style.display='block';
+    errList.innerHTML=wrongQs.map(q=>`<div class="error-card">
+      <div class="error-q">${q.q}</div>
+      <div class="error-ans">✅ ${q.a[q.c]}</div>
+      <div class="error-exp">${q.e}</div>
+    </div>`).join('');
+    btnRetryErr.disabled=false;btnRetryErr.style.opacity='1';
+  } else {
+    errSec.style.display='none';
+    btnRetryErr.disabled=true;btnRetryErr.style.opacity='0.4';
+  }
+
+  // Duel result comparison
+  if(activeDuel){
+    const cmp=document.createElement('div');
+    cmp.style.cssText='background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(232,0,45,0.06));border:2px solid rgba(124,58,237,0.3);border-radius:14px;padding:16px;text-align:center;margin-bottom:8px';
+    const win=score>activeDuel.challenger_score;
+    cmp.innerHTML=`<div style="font-size:24px;margin-bottom:6px">${win?'🏆':'😤'}</div>
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px">${win?'Tu as gagné !':'Tu as perdu…'}</div>
+      <div style="font-size:13px;color:var(--muted)">Toi : <b style="color:var(--text)">${score}/${qs.length}</b> vs ${activeDuel.challenger_pseudo} : <b style="color:var(--text)">${activeDuel.challenger_score}/${activeDuel.total}</b></div>`;
+    document.getElementById('screen-result').insertBefore(cmp,document.getElementById('errors-section'));
+    // Save opponent score
+    const player=getPlayer();
+    sbFetch(`/rest/v1/duels?id=eq.${activeDuel.id}`,{method:'PATCH',body:JSON.stringify({opponent_pseudo:player?player.pseudo:'Anonyme',opponent_score:score})});
+    activeDuel=null;
+  }
+
   showScreen('screen-result');
 }
 
 function launchConfetti(){const colors=['#E8002D','#F5800A','#F5C400','#00A550','#0064A8'];const wrap=document.getElementById('confetti');wrap.innerHTML='';for(let i=0;i<60;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.cssText=`left:${Math.random()*100}%;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-delay:${Math.random()*0.8}s;animation-duration:${2.5+Math.random()*1.5}s;border-radius:${Math.random()>0.5?'50%':'2px'}`;wrap.appendChild(el);}setTimeout(()=>wrap.innerHTML='',5000);}
 
 function retryLevel(){startQuiz(curLevel);}
+function retryErrors(){if(wrongQs.length===0)return;startQuizWithQuestions(wrongQs.slice(),curLevel);}
 function goHome(){renderHome();showScreen('screen-home');}
+
+// ── Report Modal ──────────────────────────────────────────────
+function openReportModal(){
+  const q=qs[cur];if(!q)return;
+  document.getElementById('report-q-preview').textContent=q.q;
+  document.getElementById('report-comment').value='';
+  document.querySelectorAll('input[name="report-type"]')[0].checked=true;
+  document.getElementById('report-modal').style.display='flex';
+}
+function closeReportModal(){document.getElementById('report-modal').style.display='none';}
+async function submitReport(){
+  const q=qs[cur];if(!q)return;
+  const reportType=document.querySelector('input[name="report-type"]:checked')?.value||'other';
+  const comment=document.getElementById('report-comment').value.trim();
+  const player=getPlayer();
+  closeReportModal();
+  await sbFetch('/rest/v1/reports',{method:'POST',body:JSON.stringify({
+    player_id:player?player.id:null,
+    player_pseudo:player?player.pseudo:'Anonyme',
+    question_text:q.q,
+    report_type:reportType,
+    comment:comment||null,
+    level:curLevel
+  })});
+  toast('Merci pour le signalement !');
+}
+
+// ── Duel System ───────────────────────────────────────────────
+function genDuelCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<6;i++)c+=chars[Math.floor(Math.random()*chars.length)];return c;}
+
+async function createDuel(){
+  const player=getPlayer();
+  const pseudo=player?player.pseudo:(localStorage.getItem('playerName')||'Joueur');
+  const seed=JSON.stringify(qs.map(q=>Q[curLevel].indexOf(q)));
+  const code=genDuelCode();
+  const base=window.location.href.split('?')[0];
+  const link=`${base}?duel=${code}`;
+
+  const res=await sbFetch('/rest/v1/duels',{method:'POST',body:JSON.stringify({
+    challenger_id:player?player.id:null,
+    challenger_pseudo:pseudo,
+    challenger_score:score,
+    total:qs.length,
+    level:curLevel,
+    seed,
+    duel_code:code
+  })});
+
+  if(!res){toast('Erreur lors de la création du duel.');return;}
+  if(navigator.clipboard){
+    await navigator.clipboard.writeText(link).catch(()=>{});
+  } else {
+    const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  }
+  toast('Lien de duel copié ! ⚔️');
+}
+
+async function checkDuelParam(){
+  const params=new URLSearchParams(window.location.search);
+  const code=params.get('duel');
+  if(!code)return false;
+  const data=await sbFetch(`/rest/v1/duels?duel_code=eq.${encodeURIComponent(code)}&select=*`);
+  if(!data||!data.length){toast('Duel introuvable ou expiré.');return false;}
+  const duel=data[0];
+  activeDuel=duel;
+  // Reconstitute questions from seed
+  let pool=[];
+  try{
+    const indices=JSON.parse(duel.seed);
+    pool=indices.map(i=>Q[duel.level][i]).filter(Boolean);
+  }catch(e){pool=Q[duel.level].slice();}
+  // Show duel challenge screen
+  document.getElementById('duel-challenger-info').textContent=`⚔️ Défi de ${duel.challenger_pseudo}`;
+  document.getElementById('duel-score-info').innerHTML=`${duel.challenger_pseudo} a fait <b>${duel.challenger_score}/${duel.total}</b> au niveau <b>${LEVELS[duel.level-1].name}</b><br>Peux-tu faire mieux ?`;
+  showScreen('screen-duel');
+  // Store pool for later
+  window._duelPool=pool;
+  return true;
+}
+
+function acceptDuel(){
+  if(!activeDuel||!window._duelPool)return;
+  startQuizWithQuestions(window._duelPool,activeDuel.level);
+}
+
+// ── Profile Tab ───────────────────────────────────────────────
+function renderProfileTab(){
+  const p=getP();
+  const h=p.history||[];
+  const totalSessions=h.length;
+  // Average time per session
+  const timeSessions=h.filter(s=>s.tm&&s.tm>0);
+  const avgTimeMs=timeSessions.length>0?Math.round(timeSessions.reduce((acc,s)=>acc+s.tm,0)/timeSessions.length):0;
+  const avgTimeSec=Math.round(avgTimeMs/1000);
+  const avgMins=Math.floor(avgTimeSec/60);const avgSecs=avgTimeSec%60;
+  const avgTimeStr=avgTimeSec>0?(avgMins>0?avgMins+'min '+avgSecs+'s':avgSecs+'s'):'—';
+  // Total questions & global success rate
+  const totalQ=p.totalQ||0;const totalOk=p.totalCorrect||0;
+  const globalRate=totalQ>0?Math.round(totalOk/totalQ*100):0;
+  // Best scores by level
+  const bestRows=LEVELS.map(lv=>{const best=getBest(lv.id);return`<tr>
+    <td>${lv.icon} ${lv.name}</td>
+    <td style="font-weight:700;color:${lv.tc}">${best>0?best+'/15':'—'}</td>
+    <td style="font-weight:700;color:${best>0?(Math.round(best/15*100)>=80?'var(--green)':Math.round(best/15*100)>=50?'var(--orange)':'var(--red)'):'var(--muted)'}">${best>0?Math.round(best/15*100)+'%':'—'}</td>
+  </tr>`;}).join('');
+
+  document.getElementById('tab-profil').innerHTML=`
+    <div class="card">
+      <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:12px">🏅 Meilleurs scores par niveau</div>
+      <table class="profile-table">
+        <thead><tr><th>Niveau</th><th>Score</th><th>%</th></tr></thead>
+        <tbody>${bestRows}</tbody>
+      </table>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-n">${totalSessions}</div><div class="stat-l">Sessions</div></div>
+      <div class="stat-card"><div class="stat-n">${globalRate}%</div><div class="stat-l">Taux global</div></div>
+      <div class="stat-card"><div class="stat-n">${totalQ}</div><div class="stat-l">Questions tentées</div></div>
+      <div class="stat-card"><div class="stat-n">${avgTimeStr}</div><div class="stat-l">Temps moyen</div></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">⚠️ Zone dangereuse</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Réinitialise toute ta progression locale.</div>
+      <button class="btn-reset" onclick="resetProgress()">🗑️ Réinitialiser la progression</button>
+    </div>`;
+}
+
+function resetProgress(){
+  if(!confirm('Réinitialiser toute ta progression ? Cette action est irréversible.'))return;
+  localStorage.removeItem('tep2');
+  toast('Progression réinitialisée.');
+  renderHome();
+  switchTab('stats');
+}
 
 function startFlash(lv){curLevel=lv||1;fcQ=shuffle(Q[curLevel]);fcIdx=0;fcKnown=0;showScreen('screen-flash');renderFlash();}
 function renderFlash(){const q=fcQ[fcIdx];document.getElementById('fcfront').style.display='flex';document.getElementById('fcback').style.display='none';const b=document.getElementById('fcbadge');b.textContent=CAT_ICONS[q.cat]+' '+CAT_LABELS[q.cat];b.className='qbadge '+CAT_COLORS[q.cat];document.getElementById('fcq').textContent=q.q;document.getElementById('fca').textContent=q.a[q.c];document.getElementById('fccount').textContent=`Carte ${fcIdx+1}/${fcQ.length} · ${fcKnown} connues · ${LEVELS[curLevel-1].name}`;}
@@ -868,8 +1115,15 @@ document.getElementById('tab-stats').style.display='flex';
 document.getElementById('tab-stats').style.flexDirection='column';
 document.getElementById('tab-stats').style.gap='14px';
 checkSharedScore();
-// Login gate
-if(!getPlayer()){showScreen('screen-login');}else{initHome();renderHome();}
+// Login gate + duel detection
+(async()=>{
+  if(!getPlayer()){showScreen('screen-login');}
+  else{
+    initHome();renderHome();
+    const isDuel=await checkDuelParam();
+    if(!isDuel){}// normal home
+  }
+})();
 
 
 </script>
