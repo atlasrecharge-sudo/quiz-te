@@ -437,9 +437,13 @@ async function renderLeaderboard(){
       <span style="font-size:20px">${lv.icon}</span>
       <div style="flex:1">
         <div style="font-size:14px;font-weight:700;color:var(--text)">${p.pseudo}${isMe?' 👈':''}</div>
-        <div style="font-size:11px;color:var(--muted)">Niveau ${lv.name} · ${p.sessions} session${p.sessions>1?'s':''} · Moy. ${p.avg_pct}%</div>
+        <div style="font-size:11px;color:var(--muted)">Niveau ${lv.name} · ${p.sessions} session${p.sessions>1?'s':''} · Moy. ${p.avg_pct}%${p.avg_time_sec?` · ⏱ ${Math.floor(p.avg_time_sec/60)}min${p.avg_time_sec%60>0?p.avg_time_sec%60+'s':''}`:''}
+</div>
       </div>
-      <span style="font-size:14px;font-weight:800;color:${lv.tc}">${p.best_pct}%</span>
+      <div style="text-align:right">
+        <div style="font-size:14px;font-weight:800;color:${lv.tc}">${p.best_pct}%</div>
+        ${p.best_time_sec?`<div style="font-size:10px;color:var(--muted)">⏱ meilleur ${Math.floor(p.best_time_sec/60)}min${p.best_time_sec%60>0?p.best_time_sec%60+'s':''}</div>`:''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -1017,18 +1021,28 @@ function renderProfileTab(){
   // Total questions & global success rate
   const totalQ=p.totalQ||0;const totalOk=p.totalCorrect||0;
   const globalRate=totalQ>0?Math.round(totalOk/totalQ*100):0;
+  // Best time per session (min duration where score > 0)
+  const bestTimeSec=timeSessions.length>0?Math.round(Math.min(...timeSessions.map(s=>s.tm))/1000):0;
+  const btMins=Math.floor(bestTimeSec/60);const btSecs=bestTimeSec%60;
+  const bestTimeStr=bestTimeSec>0?(btMins>0?btMins+'min '+btSecs+'s':btSecs+'s'):'—';
   // Best scores by level
-  const bestRows=LEVELS.map(lv=>{const best=getBest(lv.id);return`<tr>
+  const bestRows=LEVELS.map(lv=>{
+    const best=getBest(lv.id);
+    const lvSessions=h.filter(s=>s.lv===lv.id&&s.tm>0);
+    const lvBestTime=lvSessions.length>0?Math.round(Math.min(...lvSessions.map(s=>s.tm))/1000):0;
+    const lvTimeStr=lvBestTime>0?(Math.floor(lvBestTime/60)>0?Math.floor(lvBestTime/60)+'min '+(lvBestTime%60)+'s':(lvBestTime%60)+'s'):'—';
+    return`<tr>
     <td>${lv.icon} ${lv.name}</td>
     <td style="font-weight:700;color:${lv.tc}">${best>0?best+'/15':'—'}</td>
     <td style="font-weight:700;color:${best>0?(Math.round(best/15*100)>=80?'var(--green)':Math.round(best/15*100)>=50?'var(--orange)':'var(--red)'):'var(--muted)'}">${best>0?Math.round(best/15*100)+'%':'—'}</td>
+    <td style="font-size:11px;color:var(--muted)">⏱ ${lvTimeStr}</td>
   </tr>`;}).join('');
 
   document.getElementById('tab-profil').innerHTML=`
     <div class="card">
       <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:12px">🏅 Meilleurs scores par niveau</div>
       <table class="profile-table">
-        <thead><tr><th>Niveau</th><th>Score</th><th>%</th></tr></thead>
+        <thead><tr><th>Niveau</th><th>Score</th><th>%</th><th>⏱ Meilleur</th></tr></thead>
         <tbody>${bestRows}</tbody>
       </table>
     </div>
@@ -1037,6 +1051,7 @@ function renderProfileTab(){
       <div class="stat-card"><div class="stat-n">${globalRate}%</div><div class="stat-l">Taux global</div></div>
       <div class="stat-card"><div class="stat-n">${totalQ}</div><div class="stat-l">Questions tentées</div></div>
       <div class="stat-card"><div class="stat-n">${avgTimeStr}</div><div class="stat-l">Temps moyen</div></div>
+      <div class="stat-card"><div class="stat-n">${bestTimeStr}</div><div class="stat-l">Meilleur temps</div></div>
     </div>
     <div class="card">
       <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">⚠️ Zone dangereuse</div>
